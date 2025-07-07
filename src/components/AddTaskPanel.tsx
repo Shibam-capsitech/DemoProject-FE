@@ -16,6 +16,7 @@ import { useFormik } from 'formik';
 import { Plus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import apiService from '../api/apiService';
+import { toast } from 'react-toastify';
 
 const priorityOptions: IDropdownOption[] = [
   { key: 'High', text: 'High' },
@@ -106,10 +107,37 @@ function AddTaskPanel() {
       if (values.dueDate > values.deadline) errors.dueDate = 'Due must be before Deadline';
       return errors;
     },
-    onSubmit: values => {
-      console.log('Submitted:', values);
-      dismissPanel();
-    },
+    onSubmit: async values => {
+      const selectedBusiness = businessOptions.find(opt => opt.key === values.businessId);
+    const businessName = selectedBusiness?.text || '';
+      try {
+        const formData = new FormData();
+        formData.append('type', values.type);
+        formData.append('businessName', businessName);
+        formData.append('title', values.title);
+        formData.append('startDate', values.startDate.toISOString());
+        formData.append('dueDate', values.dueDate.toISOString());
+        formData.append('deadline', values.deadline.toISOString());
+        formData.append('priority', values.priority);
+        formData.append('description', values.description);
+        formData.append('assignee', values.assignee || '');
+        formData.append('businessId', values.businessId);
+        if (values.file) {
+          formData.append('file', values.file);
+        }
+
+        const res = await apiService.post('/Task/create-task', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        });
+        toast.success('Task created successfully!');
+        dismissPanel();
+      } catch (err) {
+        console.error('Task creation failed:', err);
+      }
+    }
+
   });
 
   const onRenderFooterContent = (
@@ -216,7 +244,7 @@ function AddTaskPanel() {
             errorMessage={formik.touched.priority ? formik.errors.priority : undefined}
             required
             styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6 } }}
-            
+
           />
           <Dropdown
             label="Assignee"

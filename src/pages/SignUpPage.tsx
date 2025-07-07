@@ -35,7 +35,7 @@ const SignupPage: React.FC = () => {
 
   const handleSubmit = async (values: typeof initialValues) => {
     try {
-      const res = await axios.post("https://localhost:7007/api/User/signup", values);
+      const res = await axios.post("http://localhost:5116/api/User/signup", values);
       console.log("Signup successful:", res.data);
       if(res.status === 200) {
         toast.success("Signup successful! Redirecting to login...");

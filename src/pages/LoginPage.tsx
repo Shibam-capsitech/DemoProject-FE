@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        const response = await axios.post("https://localhost:7007/api/User/login", values);
+        const response = await axios.post("http://localhost:5116/api/User/login", values);
         if (response.status === 200) {
           toast.success("Login successful!");
           sessionStorage.setItem("token", response.data.token);

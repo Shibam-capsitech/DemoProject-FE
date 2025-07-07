@@ -49,10 +49,11 @@ function AddBusinessPanel({ onSuccess }: { onSuccess?: () => void }) {
                 formData.append("UserId", id);
 
                 const response = await apiService.post('/Business/create-business', formData);
-                if (response.status === 200 || response.status === 201) {
+                console.log('Create Business Response:', response);
+                if (response === "Business Created Successfully") {
                     toast.success('Business created successfully!');
                     dismissPanel();
-                    if (onSuccess) onSuccess(); // e.g., to refresh data
+                    if (onSuccess) onSuccess(); 
                 } else {
                     toast.error('Failed to create business');
                 }
