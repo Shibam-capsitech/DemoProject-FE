@@ -12,7 +12,7 @@ const TaskDetailsPage: React.FC = () => {
       <Stack.Item grow={1} styles={{ root: { borderRight: '1px solid #eee', padding: 16, minWidth: 300 } }}>
         <TaskSummary />
       </Stack.Item>
-      <Stack.Item grow={2} styles={{ root: { borderRight: '1px solid #eee', padding: 16 } }}>
+      <Stack.Item grow={1} styles={{ root: { borderRight: '1px solid #eee', padding: 16 ,maxidth: 1000 } }}>
         <TaskHistory />
       </Stack.Item>
       <Stack.Item grow={1} styles={{ root: { padding: 16 } }}>
