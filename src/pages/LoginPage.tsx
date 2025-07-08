@@ -7,29 +7,35 @@ import {
   Text,
   DefaultButton,
 } from "@fluentui/react";
-import axios from "axios";
-import { toast } from "react-toastify";
 import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
 import apiService from "../api/apiService";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+
+  const validationSchema = Yup.object({
+    email: Yup.string()
+      .email("Invalid email format")
+      .required("Email is required"),
+    password: Yup.string()
+      .min(6, "Password must be at least 6 characters")
+      .required("Password is required"),
+  });
 
   const formik = useFormik({
     initialValues: {
       email: "",
       password: "",
     },
+    validationSchema,
     onSubmit: async (values) => {
       try {
-        const response = await apiService.post("/User/login",values);
-        if (response.status === 200) {
-          toast.success("Login successful!");
-          sessionStorage.setItem("token", response.data.token);
-          navigate("/admin/clients");
-        } else {
-          toast.error("Login failed!");
-        }
+        const response = await apiService.post("/User/login", values);
+        toast.success("Login successful!");
+        sessionStorage.setItem("token", response.token);
+        navigate("/admin/clients");
       } catch (error: any) {
         toast.error(error?.response?.data || "Login error");
       }
@@ -81,9 +87,13 @@ const LoginPage: React.FC = () => {
             name="email"
             type="email"
             value={formik.values.email}
-           onChange={(_, value) => formik.setFieldValue("email", value)}
-            required
-             styles={{ fieldGroup: { borderRadius: 6, width: "100%" }, root: { width: "100%",  } }}
+            onChange={(_, value) => formik.setFieldValue("email", value)}
+            onBlur={formik.handleBlur}
+            errorMessage={formik.touched.email ? formik.errors.email : undefined}
+            styles={{
+              fieldGroup: { borderRadius: 6, width: "100%" },
+              root: { width: "100%" },
+            }}
           />
 
           <TextField
@@ -94,8 +104,14 @@ const LoginPage: React.FC = () => {
             revealPasswordAriaLabel="Show password"
             value={formik.values.password}
             onChange={formik.handleChange}
-            required
-            styles={{ fieldGroup: { borderRadius: 6, width: "100%" }, root: { width: "100%",  } }}
+            onBlur={formik.handleBlur}
+            errorMessage={
+              formik.touched.password ? formik.errors.password : undefined
+            }
+            styles={{
+              fieldGroup: { borderRadius: 6, width: "100%" },
+              root: { width: "100%" },
+            }}
           />
 
           <PrimaryButton

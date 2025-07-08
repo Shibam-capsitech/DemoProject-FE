@@ -11,12 +11,25 @@ import { useRefresh } from '../context/RefreshContext';
 
 const columns = [
   {
-    key: 'id',
-    name: 'Business ID',
-    fieldName: 'id',
+    key: 'bId',
+    name: 'Client ID',
+    fieldName: 'bId',
     minWidth: 100,
     isResizable: true,
-    onRender: (item: any) => <span style={{ fontFamily: 'monospace' }}>{item.id}</span>,
+    onRender: (item: any) => (
+      <span
+        style={{
+          fontFamily: 'monospace',
+          backgroundColor: '#d4f4dd',
+          color: '#1b5e20',
+          padding: '2px 6px',
+          borderRadius: 4,
+          display: 'inline-block',
+        }}
+      >
+        {item.bId}
+      </span>
+    ),
   },
   {
     key: 'type',
@@ -96,46 +109,34 @@ const columns = [
       </span>
     ),
   },
-  {
-    key: 'actions',
-    name: 'Actions',
-    fieldName: 'actions',
-    minWidth: 140,
-    onRender: (item: any) => (
-      <div style={{ display: 'flex', gap: 8 }}>
-        <Eye size={16} style={{ cursor: 'pointer' }} onClick={() => console.log('View', item)} />
-        <Edit2 size={16} style={{ cursor: 'pointer' }} onClick={() => console.log('Edit', item)} />
-        <Trash2 size={16} style={{ cursor: 'pointer' }} onClick={() => console.log('Delete', item)} />
-      </div>
-    ),
-  },
 ];
 
 const ClientPage: React.FC = () => {
   const [clientData, setClientData] = useState<any[]>([]);
-  const {refresh} = useRefresh()
-  
+  const { refresh } = useRefresh()
+
 
   const fetchClientData = async () => {
     try {
       const response = await apiService.get('/Business/get-all-businesses');
-   console.log('Formatted Client Data:', response);
-        const formatted = response.businesses?.map((b: any) => ({
-          id: b.id,
-          type: b.type,
-          name: b.name,
-          building: b.building,
-          city: b.city,
-          state: b.state,
-          country: b.country,
-          postcode: b.postcode,
-          username: b.userDetails?.username || 'N/A',
-          email: b.userDetails?.email || 'N/A',
-          createdAt: b.createdAt,
-        }));
+      console.log('Formatted Client Data:', response);
+      const formatted = response.businesses?.map((b: any) => ({
+        id: b.id,
+        bId: b.bId,
+        type: b.type,
+        name: b.name,
+        building: b.building,
+        city: b.city,
+        state: b.state,
+        country: b.country,
+        postcode: b.postcode,
+        username: b.userDetails?.username || 'N/A',
+        email: b.userDetails?.email || 'N/A',
+        createdAt: b.createdAt,
+      }));
 
-        setClientData(formatted);
-        console.log('Formatted Client Data:', formatted);
+      setClientData(formatted);
+      console.log('Formatted Client Data:', formatted);
 
     } catch (error) {
       toast.error('Failed to fetch client data');

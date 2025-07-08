@@ -156,18 +156,6 @@ const ClientPage: React.FC = () => {
         </a>
       ),
     },
-    {
-      key: 'actions',
-      name: 'Actions',
-      fieldName: 'actions',
-      onRender: (item: any) => (
-        <div style={{ display: 'flex', gap: 8, ...cellStyle }}>
-          <Eye size={16} style={{ cursor: 'pointer' }} />
-          <Edit2 size={16} style={{ cursor: 'pointer' }} />
-          <Trash2 size={16} style={{ cursor: 'pointer' }} />
-        </div>
-      ),
-    },
   ];
 
   return (

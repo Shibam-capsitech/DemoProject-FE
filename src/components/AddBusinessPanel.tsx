@@ -10,7 +10,7 @@ import {
 import { useBoolean } from '@fluentui/react-hooks';
 import { useFormik } from 'formik';
 import { Plus } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { toast } from 'react-toastify';
 import apiService from '../api/apiService';
 import { useUser } from '../context/UserContext';
@@ -26,6 +26,7 @@ function AddBusinessPanel({ onSuccess }: { onSuccess?: () => void }) {
     const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
     const { id } = useUser();
     const { toggleRefresh } = useRefresh()
+    const [submitting, setSubmitting] = useState(false);
     const formik = useFormik({
         initialValues: {
             type: '',
@@ -37,9 +38,10 @@ function AddBusinessPanel({ onSuccess }: { onSuccess?: () => void }) {
             state: '',
         },
         onSubmit: async (values) => {
+            setSubmitting(true)
             const requiredFields = ['type', 'name', 'building', 'city', 'state', 'country', 'postcode'];
             const missing = requiredFields.filter(field => !values[field as keyof typeof values]);
-console.log('Form Values:', values);
+            console.log('Form Values:', values);
             if (missing.length > 0) {
                 console.log('Form Values:,.............');
                 toast.error(`Please fill in all required fields: ${missing.join(', ')}`);
@@ -69,6 +71,9 @@ console.log('Form Values:', values);
             } catch (error: any) {
                 toast.error('Error creating business');
                 console.error('Create Business Error:', error?.response?.data || error);
+            } finally {
+                setSubmitting(false);
+                formik.resetForm();
             }
         },
     });
@@ -76,7 +81,9 @@ console.log('Form Values:', values);
     const onRenderFooterContent = React.useCallback(
         () => (
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                <PrimaryButton onClick={() => formik.handleSubmit()}>Save</PrimaryButton>
+                <PrimaryButton type="submit" onClick={() => formik.handleSubmit()} disabled={!formik.isValid || submitting}>
+                    {submitting ? 'Saving...' : 'Save'}
+                </PrimaryButton>
                 <DefaultButton onClick={dismissPanel}>Cancel</DefaultButton>
             </div>
         ),

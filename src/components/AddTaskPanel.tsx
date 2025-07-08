@@ -55,6 +55,7 @@ function AddTaskPanel() {
   const [businessOptions, setBusinessOptions] = useState<IDropdownOption[]>([]);
   const [assigneeOptions, setAssigneeOptions] = useState<IDropdownOption[]>([]);
   const { toggleRefresh } = useRefresh()
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -111,6 +112,7 @@ function AddTaskPanel() {
       return errors;
     },
     onSubmit: async values => {
+      setSubmitting(true);
       const selectedBusiness = businessOptions.find(opt => opt.key === values.businessId);
       const businessName = selectedBusiness?.text || '';
       try {
@@ -136,9 +138,12 @@ function AddTaskPanel() {
         });
         toast.success('Task created successfully!');
         toggleRefresh()
+        formik.resetForm();
         dismissPanel();
       } catch (err) {
         console.error('Task creation failed:', err);
+      } finally {
+        setSubmitting(false)
       }
     }
 
@@ -146,8 +151,8 @@ function AddTaskPanel() {
 
   const onRenderFooterContent = (
     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-      <PrimaryButton type="submit" onClick={formik.handleSubmit} disabled={!formik.isValid}>
-        Save
+      <PrimaryButton type="submit" onClick={() => formik.handleSubmit()} disabled={!formik.isValid || submitting}>
+        {submitting ? 'Saving...' : 'Save'}
       </PrimaryButton>
       <DefaultButton onClick={dismissPanel}>Cancel</DefaultButton>
     </div>
