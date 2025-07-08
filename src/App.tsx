@@ -6,17 +6,49 @@ import TaskListPage from "./pages/TaskListPage";
 import NotFoundPage from "./pages/NotFoundPage";
 import Dashboard from "./pages/Dashboard";
 import TaskDetailsPage from "./pages/TaskDetailsPage";
+import ProtectedRoute from "./components/ProtectRoute";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/admin" element={<Dashboard/>} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
-        <Route path="/admin/clients" element={<ClientPage />} />
-        <Route path="/admin/tasks" element={<TaskListPage />} />
-        <Route path="/admin/tasks/:id" element={<TaskDetailsPage />} />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/clients"
+          element={
+            <ProtectedRoute>
+              <ClientPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/tasks"
+          element={
+            <ProtectedRoute>
+              <TaskListPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/tasks/:id"
+          element={
+            <ProtectedRoute>
+              <TaskDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Router>

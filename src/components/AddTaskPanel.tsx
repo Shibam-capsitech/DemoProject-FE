@@ -17,6 +17,7 @@ import { Plus } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import apiService from '../api/apiService';
 import { toast } from 'react-toastify';
+import { useRefresh } from '../context/RefreshContext';
 
 const priorityOptions: IDropdownOption[] = [
   { key: 'High', text: 'High' },
@@ -24,7 +25,6 @@ const priorityOptions: IDropdownOption[] = [
   { key: 'Low', text: 'Low' },
 ];
 
-// Soft styling
 const softFieldStyles: Partial<ITextFieldStyles> = {
   fieldGroup: {
     borderRadius: 6,
@@ -54,8 +54,8 @@ function AddTaskPanel() {
   const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
   const [businessOptions, setBusinessOptions] = useState<IDropdownOption[]>([]);
   const [assigneeOptions, setAssigneeOptions] = useState<IDropdownOption[]>([]);
+  const {toggleRefresh} = useRefresh()
 
-  // Load dropdown data
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -132,6 +132,7 @@ function AddTaskPanel() {
           },
         });
         toast.success('Task created successfully!');
+        toggleRefresh()
         dismissPanel();
       } catch (err) {
         console.error('Task creation failed:', err);
@@ -175,32 +176,27 @@ function AddTaskPanel() {
             gap: 16,
           }}
         >
-          {/* Type Field */}
           <TextField
             label="Type"
             value={formik.values.type}
             onChange={(_, val) => formik.setFieldValue('type', val)}
             onBlur={formik.handleBlur}
-            errorMessage={formik.touched.type && formik.errors.type}
+             errorMessage={formik.touched.businessId ? formik.errors.businessId : undefined}
             required
             styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
           />
 
-          {/* Business Dropdown */}
           <Dropdown
             label="Business"
             options={businessOptions}
             selectedKey={formik.values.businessId}
             onChange={(_, opt) => formik.setFieldValue('businessId', opt?.key)}
             onBlur={() => formik.setFieldTouched('businessId', true)}
-            errorMessage={formik.touched.businessId && formik.errors.businessId}
+            errorMessage={formik.touched.businessId ? formik.errors.businessId : undefined}
             required
-            styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6, gridColumn: 'span 2' } }}
-            allowFreeform={false}
-            useComboBox
+            styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6, gridColumn: 'span 2' } }}  
           />
 
-          {/* Title */}
           <TextField
             label="Title"
             value={formik.values.title}
@@ -211,7 +207,6 @@ function AddTaskPanel() {
             styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
           />
 
-          {/* Dates */}
           <DatePicker
             label="Start Date"
             value={formik.values.startDate}
@@ -234,7 +229,6 @@ function AddTaskPanel() {
             styles={{ ...softDatePickerStyles, root: { gridColumn: 'span 2' } }}
           />
 
-          {/* Priority and Assignee */}
           <Dropdown
             label="Priority"
             options={priorityOptions}
@@ -252,11 +246,8 @@ function AddTaskPanel() {
             selectedKey={formik.values.assignee}
             onChange={(_, opt) => formik.setFieldValue('assignee', opt?.key)}
             styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6 } }}
-            allowFreeform={false}
-            useComboBox
           />
 
-          {/* Description */}
           <TextField
             label="Description"
             multiline
@@ -266,7 +257,6 @@ function AddTaskPanel() {
             styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
           />
 
-          {/* File Upload */}
           <input
             type="file"
             onChange={e => {

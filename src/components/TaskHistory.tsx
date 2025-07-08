@@ -10,6 +10,7 @@ import {
 import { useParams } from 'react-router-dom';
 import { Edit } from 'lucide-react';
 import apiService from '../api/apiService';
+import { useRefresh } from '../context/RefreshContext';
 
 interface TaskChange {
   field: string;
@@ -36,6 +37,7 @@ interface TaskHistoryData {
 const TaskHistory: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [history, setHistory] = useState<TaskHistoryData[]>([]);
+  const {refresh} = useRefresh();
 
   const fetchTaskHistory = async (taskId: string) => {
     try {
@@ -50,11 +52,11 @@ const TaskHistory: React.FC = () => {
     if (id) {
       fetchTaskHistory(id);
     }
-  }, [id]);
+  }, [id,refresh]);
 
   return (
-    <div style={{ width: 900, margin: '0 auto' }}>
-      <Stack tokens={{ childrenGap: 12 }}>
+    <div style={{ width: "90%", margin: '0 auto' }}>
+      <Stack tokens={{ childrenGap: 0 }}>
         <Pivot>
           <PivotItem headerText="History">
             <Stack tokens={{ childrenGap: 12 }}>

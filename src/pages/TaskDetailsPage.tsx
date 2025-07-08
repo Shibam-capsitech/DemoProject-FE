@@ -9,10 +9,10 @@ const TaskDetailsPage: React.FC = () => {
   return (
     <Layout>
     <Stack horizontal styles={{ root: { height: '100vh', borderTop:"1px solid #f4f4f4" } }}>
-      <Stack.Item grow={1} styles={{ root: { borderRight: '1px solid #eee', padding: 16, minWidth: 300 } }}>
+      <Stack.Item grow={1} styles={{ root: { borderRight: '1px solid #eee', padding: 16, maxWidth: 400 } }}>
         <TaskSummary />
       </Stack.Item>
-      <Stack.Item grow={1} styles={{ root: { borderRight: '1px solid #eee', padding: 16 ,maxidth: 1000 } }}>
+      <Stack.Item grow={1} styles={{ root: { borderRight: '1px solid #eee', padding: 0 } }}>
         <TaskHistory />
       </Stack.Item>
       <Stack.Item grow={1} styles={{ root: { padding: 16 } }}>

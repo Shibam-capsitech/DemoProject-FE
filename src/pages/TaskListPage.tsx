@@ -3,13 +3,12 @@ import CustomTable from '../components/DataTable';
 import Layout from '../components/Layout/Layout';
 import {
   DefaultButton,
-  PrimaryButton,
 } from '@fluentui/react';
-import { useBoolean } from '@fluentui/react-hooks';
-import { Trash2, Edit2, Eye, Plus, RefreshCcw } from 'lucide-react';
+import { Trash2, Edit2, Eye, RefreshCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AddTaskPanel from '../components/AddTaskPanel';
 import apiService from '../api/apiService';
+import { useRefresh } from '../context/RefreshContext';
 
 const cellStyle: React.CSSProperties = {
   fontSize: 14,
@@ -21,12 +20,12 @@ const cellStyle: React.CSSProperties = {
 
 const ClientPage: React.FC = () => {
   const [tasks, setTasks] = useState([]);
-  const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
   const navigate = useNavigate();
+  const { refresh } = useRefresh()
 
   useEffect(() => {
     fetchTasks();
-  }, []);
+  }, [refresh]);
 
   const fetchTasks = async () => {
     try {
@@ -63,7 +62,15 @@ const ClientPage: React.FC = () => {
       name: 'Title',
       fieldName: 'title',
       onRender: (item: any) => (
-        <span style={cellStyle} onClick={() => navigate(`/admin/tasks/${item.id}`)}>
+        <span
+          style={{
+            color: '#0078d4',
+            textDecoration: 'underline',
+            cursor: 'pointer',
+            ...cellStyle,
+          }}
+          onClick={() => navigate(`/admin/tasks/${item.id}`)}
+        >
           {item.title}
         </span>
       ),

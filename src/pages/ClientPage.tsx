@@ -7,6 +7,7 @@ import { Trash2, Edit2, Eye, RefreshCcw } from 'lucide-react';
 import AddBusinessPanel from '../components/AddBusinessPanel';
 import apiService from '../api/apiService';
 import { toast } from 'react-toastify';
+import { useRefresh } from '../context/RefreshContext';
 
 const columns = [
   {
@@ -112,6 +113,8 @@ const columns = [
 
 const ClientPage: React.FC = () => {
   const [clientData, setClientData] = useState<any[]>([]);
+  const {refresh} = useRefresh()
+  
 
   const fetchClientData = async () => {
     try {
@@ -142,7 +145,7 @@ const ClientPage: React.FC = () => {
 
   useEffect(() => {
     fetchClientData();
-  }, []);
+  }, [refresh]);
 
   return (
     <Layout>

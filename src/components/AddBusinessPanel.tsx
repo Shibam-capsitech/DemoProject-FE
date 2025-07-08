@@ -14,6 +14,7 @@ import React from 'react';
 import { toast } from 'react-toastify';
 import apiService from '../api/apiService';
 import { useUser } from '../context/UserContext';
+import { useRefresh } from '../context/RefreshContext';
 
 const typeOptions: IDropdownOption[] = [
     { key: 'Individual', text: 'Individual' },
@@ -24,7 +25,7 @@ const typeOptions: IDropdownOption[] = [
 function AddBusinessPanel({ onSuccess }: { onSuccess?: () => void }) {
     const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
     const { id } = useUser();
-
+    const { toggleRefresh } = useRefresh()
     const formik = useFormik({
         initialValues: {
             type: '',
@@ -52,8 +53,9 @@ function AddBusinessPanel({ onSuccess }: { onSuccess?: () => void }) {
                 console.log('Create Business Response:', response);
                 if (response === "Business Created Successfully") {
                     toast.success('Business created successfully!');
+                    toggleRefresh()
                     dismissPanel();
-                    if (onSuccess) onSuccess(); 
+                    if (onSuccess) onSuccess();
                 } else {
                     toast.error('Failed to create business');
                 }

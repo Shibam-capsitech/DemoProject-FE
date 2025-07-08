@@ -20,6 +20,9 @@ import { useBoolean } from '@fluentui/react-hooks';
 import { useFormik } from 'formik';
 import apiService from '../api/apiService';
 import { initializeIcons } from '@fluentui/react';
+import { useRefresh } from '../context/RefreshContext';
+import { Edit } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 initializeIcons();
 
@@ -54,8 +57,8 @@ const softDatePickerStyles: IStyleFunctionOrObject<IDatePickerStyleProps, IDateP
   },
 };
 
-const labelStyle = { fontWeight: '600', color: '#666', fontSize: 13 };
-const valueStyle = { fontSize: 15, fontWeight: '500' };
+const labelStyle = { fontWeight: '600', color: '#666', fontSize: 14 };
+const valueStyle = { fontSize: 16, fontWeight: '500' };
 
 const TaskSummary: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -63,6 +66,9 @@ const TaskSummary: React.FC = () => {
   const [isPanelOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
   const [businessOptions, setBusinessOptions] = useState<IDropdownOption[]>([]);
   const [userOptions, setUserOptions] = useState<IDropdownOption[]>([]);
+  const { toggleRefresh } = useRefresh();
+  const { role } = useUser()
+
 
   const fetchTask = async () => {
     try {
@@ -92,6 +98,7 @@ const TaskSummary: React.FC = () => {
         console.log('Task updated:', res);
         dismissPanel();
         fetchTask();
+        toggleRefresh();
       } catch (err) {
         console.error('Edit failed:', err);
       }
@@ -101,56 +108,89 @@ const TaskSummary: React.FC = () => {
   useEffect(() => {
     if (id) fetchTask();
 
-    const fetchOptions = async () => {
+    const fetchBusinesses = async () => {
       try {
-        const [businessRes, userRes] = await Promise.all([
-          apiService.get('/Business/get-all-businesses'),
-          apiService.get('/User/get-all-users'),
-        ]);
-        setBusinessOptions(businessRes.businesses.map((b: any) => ({ key: b.id, text: b.name })));
-        setUserOptions(userRes.users.result.map((u: any) => ({ key: u.id, text: u.name })));
+        const businessRes = await apiService.get('/Business/get-all-businesses');
+        setBusinessOptions(
+          businessRes.businesses.map((b: any) => ({
+            key: b.id,
+            text: b.name,
+          }))
+        );
       } catch (e) {
-        console.error('Failed to load dropdown options', e);
+        console.error('Failed to load businesses', e);
       }
     };
 
-    fetchOptions();
+    const fetchUsers = async () => {
+      try {
+        const userRes = await apiService.get('/User/get-all-users');
+        setUserOptions(
+          userRes.users.result.map((u: any) => ({
+            key: u.id,
+            text: u.name,
+          }))
+        );
+      } catch (e) {
+        console.error('Failed to load users', e);
+      }
+    };
+
+    fetchBusinesses();
+    fetchUsers();
   }, [id]);
+
 
   const formatDate = (date: string | Date) => new Date(date).toLocaleDateString('en-GB');
 
   if (!task) return <Text>Loading task summary...</Text>;
 
   return (
-    <Stack tokens={{ childrenGap: 10 }} styles={{ root: { padding: '12px', maxWidth: 320 } }}>
-      <Stack horizontal horizontalAlign="space-between">
+    <Stack tokens={{ childrenGap: 16 }} styles={{ root: { padding: 5, Width: 300, } }}>
+      <Stack horizontal horizontalAlign="space-between" >
         <Stack>
           <Text styles={{ root: labelStyle }}>Task name</Text>
-          <Link styles={{ root: { ...valueStyle, color: '#0078d4' } }}>{task.title || 'N/A'}</Link>
+          <Link styles={{ root: { ...valueStyle, color: '#0078d4', fontSize: 16 } }}>{task.title || 'N/A'}</Link>
         </Stack>
-        <DefaultButton text="Edit" onClick={openPanel} />
+        {role!=="Staff" && <DefaultButton onClick={openPanel} styles={{ root: { border: "none" } }} > <Edit size={30} />  </DefaultButton>}
       </Stack>
 
-      <Text styles={{ root: labelStyle }}>Priority</Text>
-      <span style={{ backgroundColor: '#dcefff', color: '#0078d4', fontSize: 12, padding: '2px 8px', borderRadius: 6, display: 'inline-block' }}>{task.priority}</span>
+      <Stack tokens={{ childrenGap: 6 }}>
+        <Text styles={{ root: labelStyle }}>Priority</Text>
+        <span
+          style={{
+            backgroundColor: '#dcefff',
+            color: '#0078d4',
+            fontSize: 12,
+            padding: '4px 10px',
+            borderRadius: 10,
+            display: 'inline-block',
+            width: 'fit-content',
+          }}
+        >
+          {task.priority}
+        </span>
+      </Stack>
 
-      <Text styles={{ root: labelStyle }}>Action date</Text>
-      <Text styles={{ root: { ...valueStyle, color: 'green' } }}>{formatDate(task.createdAt)}</Text>
+      <Stack tokens={{ childrenGap: 8 }}>
+        <Text styles={{ root: labelStyle }}>Action date</Text>
+        <Text styles={{ root: { ...valueStyle, color: 'green' } }}>{formatDate(task.createdAt)}</Text>
 
-      <Text styles={{ root: labelStyle }}>Start date</Text>
-      <Text styles={{ root: valueStyle }}>{formatDate(task.startDate)}</Text>
+        <Text styles={{ root: labelStyle }}>Start date</Text>
+        <Text styles={{ root: valueStyle }}>{formatDate(task.startDate)}</Text>
 
-      <Text styles={{ root: labelStyle }}>Due date</Text>
-      <Text styles={{ root: valueStyle }}>{formatDate(task.dueDate)}</Text>
+        <Text styles={{ root: labelStyle }}>Due date</Text>
+        <Text styles={{ root: valueStyle }}>{formatDate(task.dueDate)}</Text>
 
-      <Text styles={{ root: labelStyle }}>Deadline</Text>
-      <Text styles={{ root: valueStyle }}>{formatDate(task.deadline)}</Text>
+        <Text styles={{ root: labelStyle }}>Deadline</Text>
+        <Text styles={{ root: valueStyle }}>{formatDate(task.deadline)}</Text>
 
-      <Text styles={{ root: labelStyle }}>Description</Text>
-      <Text styles={{ root: valueStyle }}>{task.description}</Text>
+        <Text styles={{ root: labelStyle }}>Description</Text>
+        <Text styles={{ root: valueStyle }}>{task.description}</Text>
 
-      <Text styles={{ root: labelStyle }}>Assignee</Text>
-      <Link styles={{ root: { ...valueStyle, color: '#0078d4' } }}>{task.assignee}</Link>
+        <Text styles={{ root: labelStyle }}>Assignee</Text>
+        <Link styles={{ root: { ...valueStyle, color: '#0078d4' } }}> {userOptions.find(u => u.key === task.assignee)?.text || 'N/A'}</Link>
+      </Stack>
 
       <Panel
         isOpen={isPanelOpen}
@@ -174,15 +214,66 @@ const TaskSummary: React.FC = () => {
             gap: 16,
           }}
         >
-          <TextField label="Type" disabled value={formik.values.type} onChange={(_, val) => formik.setFieldValue('type', val)} styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }} />
-          <Dropdown label="Business" disabled options={businessOptions} selectedKey={formik.values.businessId} onChange={(_, opt) => formik.setFieldValue('businessId', opt?.key)} styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6, gridColumn: 'span 2' } }} />
-          <TextField label="Title" value={formik.values.title} onChange={(_, val) => formik.setFieldValue('title', val)} styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }} />
-          <DatePicker label="Start Date" value={formik.values.startDate} onSelectDate={date => formik.setFieldValue('startDate', date!)} styles={softDatePickerStyles} />
-          <DatePicker label="Due Date" value={formik.values.dueDate} onSelectDate={date => formik.setFieldValue('dueDate', date!)} styles={softDatePickerStyles} />
-          <DatePicker label="Deadline" value={formik.values.deadline} onSelectDate={date => formik.setFieldValue('deadline', date!)} styles={{ ...softDatePickerStyles, root: { gridColumn: 'span 2' } }} />
-          <Dropdown label="Priority" options={priorityOptions} selectedKey={formik.values.priority} onChange={(_, opt) => formik.setFieldValue('priority', opt?.key)} styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6 } }} />
-          <Dropdown label="Assignee" options={userOptions} selectedKey={formik.values.assignee} onChange={(_, opt) => formik.setFieldValue('assignee', opt?.key)} styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6 } }} />
-          <TextField label="Description" multiline rows={3} value={formik.values.description} onChange={(_, val) => formik.setFieldValue('description', val)} styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }} />
+          <TextField
+            label="Type"
+            disabled value={formik.values.type}
+            onChange={(_, val) => formik.setFieldValue('type', val)}
+            styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
+          />
+          <Dropdown
+            label="Business"
+            disabled
+            options={businessOptions}
+            selectedKey={formik.values.businessId}
+            onChange={(_, opt) => formik.setFieldValue('businessId', opt?.key)}
+            styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6, gridColumn: 'span 2' } }}
+          />
+          <TextField
+            label="Title"
+            value={formik.values.title}
+            onChange={(_, val) => formik.setFieldValue('title', val)}
+            styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
+          />
+          <DatePicker
+            label="Start Date"
+            value={formik.values.startDate}
+            onSelectDate={date => formik.setFieldValue('startDate', date!)}
+            styles={softDatePickerStyles}
+          />
+          <DatePicker
+            label="Due Date"
+            value={formik.values.dueDate}
+            onSelectDate={date => formik.setFieldValue('dueDate', date!)}
+            styles={softDatePickerStyles}
+          />
+          <DatePicker
+            label="Deadline"
+            value={formik.values.deadline}
+            onSelectDate={date => formik.setFieldValue('deadline', date!)}
+            styles={{ ...softDatePickerStyles, root: { gridColumn: 'span 2' } }}
+          />
+          <Dropdown
+            label="Priority"
+            options={priorityOptions}
+            selectedKey={formik.values.priority}
+            onChange={(_, opt) => formik.setFieldValue('priority', opt?.key)}
+            styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6 } }}
+          />
+          <Dropdown
+            label="Assignee"
+            options={userOptions}
+            selectedKey={formik.values.assignee}
+            onChange={(_, opt) => formik.setFieldValue('assignee', opt?.key)}
+            styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6 } }}
+          />
+          <TextField
+            label="Description"
+            multiline
+            rows={3}
+            value={formik.values.description}
+            onChange={(_, val) => formik.setFieldValue('description', val)}
+            styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
+          />
         </form>
       </Panel>
     </Stack>

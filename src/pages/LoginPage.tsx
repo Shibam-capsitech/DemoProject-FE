@@ -10,6 +10,7 @@ import {
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useFormik } from "formik";
+import apiService from "../api/apiService";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const LoginPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        const response = await axios.post("http://localhost:5116/api/User/login", values);
+        const response = await apiService.post("/User/login",values);
         if (response.status === 200) {
           toast.success("Login successful!");
           sessionStorage.setItem("token", response.data.token);

@@ -10,7 +10,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { Formik } from "formik";
 import axios from "axios";
-import { ToastContainer, toast } from 'react-toastify'
+import { toast } from 'react-toastify'
+import apiService from "../api/apiService";
 
 const roles: IDropdownOption[] = [
   { key: "Admin", text: "Admin" },
@@ -35,7 +36,7 @@ const SignupPage: React.FC = () => {
 
   const handleSubmit = async (values: typeof initialValues) => {
     try {
-      const res = await axios.post("http://localhost:5116/api/User/signup", values);
+      const res = await apiService.post("/User/signup", values);
       console.log("Signup successful:", res.data);
       if(res.status === 200) {
         toast.success("Signup successful! Redirecting to login...");
