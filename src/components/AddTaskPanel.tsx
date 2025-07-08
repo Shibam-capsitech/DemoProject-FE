@@ -105,6 +105,8 @@ function AddTaskPanel() {
       if (!values.priority) errors.priority = 'Priority is required';
       if (values.startDate > values.dueDate) errors.startDate = 'Start must be before Due';
       if (values.dueDate > values.deadline) errors.dueDate = 'Due must be before Deadline';
+      if (!values.assignee) errors.assignee = 'Assignee is required';
+      if (!values.description) errors.description = 'Description is required';
       return errors;
     },
     onSubmit: async values => {
