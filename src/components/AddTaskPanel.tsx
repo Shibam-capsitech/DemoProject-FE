@@ -107,6 +107,7 @@ function AddTaskPanel() {
       if (values.dueDate > values.deadline) errors.dueDate = 'Due must be before Deadline';
       if (!values.assignee) errors.assignee = 'Assignee is required';
       if (!values.description) errors.description = 'Description is required';
+      if (!values.file) errors.file = 'Attachment is required';
       return errors;
     },
     onSubmit: async values => {
@@ -286,15 +287,22 @@ function AddTaskPanel() {
             styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
           />
 
-          <input
-            type="file"
-            required
-            onChange={e => {
-              const f = e.currentTarget.files?.[0] || null;
-              formik.setFieldValue('file', f);
-            }}
-            style={{ gridColumn: 'span 2' }}
-          />
+          <div style={{ gridColumn: 'span 2' }}>
+            <input
+              type="file"
+              onChange={e => {
+                const f = e.currentTarget.files?.[0] || null;
+                formik.setFieldValue('file', f);
+              }}
+              onBlur={() => formik.setFieldTouched('file', true)}
+              required
+            />
+            {formik.touched.file && formik.errors.file && (
+              <div style={{ color: 'red', fontSize: '12px', marginTop: 4 }}>
+                {formik.errors.file}
+              </div>
+            )}
+          </div>
         </form>
       </Panel>
     </>
