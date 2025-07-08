@@ -54,7 +54,7 @@ function AddTaskPanel() {
   const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
   const [businessOptions, setBusinessOptions] = useState<IDropdownOption[]>([]);
   const [assigneeOptions, setAssigneeOptions] = useState<IDropdownOption[]>([]);
-  const {toggleRefresh} = useRefresh()
+  const { toggleRefresh } = useRefresh()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -109,7 +109,7 @@ function AddTaskPanel() {
     },
     onSubmit: async values => {
       const selectedBusiness = businessOptions.find(opt => opt.key === values.businessId);
-    const businessName = selectedBusiness?.text || '';
+      const businessName = selectedBusiness?.text || '';
       try {
         const formData = new FormData();
         formData.append('type', values.type);
@@ -176,14 +176,37 @@ function AddTaskPanel() {
             gap: 16,
           }}
         >
-          <TextField
+          <Dropdown
             label="Type"
-            value={formik.values.type}
-            onChange={(_, val) => formik.setFieldValue('type', val)}
-            onBlur={formik.handleBlur}
-             errorMessage={formik.touched.businessId ? formik.errors.businessId : undefined}
+            options={[
+              { key: 'Send Printed Incorporation Document', text: 'Send Printed Incorporation Document' },
+              { key: 'Confirmation Statement', text: 'Confirmation Statement' },
+              { key: 'VAT Return', text: 'VAT Return' },
+              { key: 'Dormant Company Accounts', text: 'Dormant Company Accounts' },
+              { key: 'HMRC Authorisation process', text: 'HMRC Authorisation process' },
+              { key: 'Weekly Payroll', text: 'Weekly Payroll' },
+              { key: 'Annual Payroll', text: 'Annual Payroll' },
+              { key: 'Monthly Bookkeeping', text: 'Monthly Bookkeeping' },
+              { key: 'VAT Registration', text: 'VAT Registration' },
+            ]}
+            selectedKey={formik.values.type}
+            onChange={(_, option) => {
+              formik.setFieldValue('type', option?.key);
+
+              if (!formik.values.title || !formik.touched.title) {
+                formik.setFieldValue('title', option?.text);
+              }
+            }}
+            onBlur={() => formik.setFieldTouched('type', true)}
+            errorMessage={formik.touched.type ? formik.errors.type : undefined}
             required
-            styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
+            styles={{
+              dropdown: {
+                border: '1px solid #d0d0d0',
+                borderRadius: 6,
+                gridColumn: 'span 2',
+              },
+            }}
           />
 
           <Dropdown
@@ -194,7 +217,7 @@ function AddTaskPanel() {
             onBlur={() => formik.setFieldTouched('businessId', true)}
             errorMessage={formik.touched.businessId ? formik.errors.businessId : undefined}
             required
-            styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6, gridColumn: 'span 2' } }}  
+            styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6, gridColumn: 'span 2' } }}
           />
 
           <TextField
@@ -244,6 +267,8 @@ function AddTaskPanel() {
             label="Assignee"
             options={assigneeOptions}
             selectedKey={formik.values.assignee}
+            required
+            errorMessage={formik.touched.assignee ? formik.errors.assignee : undefined}
             onChange={(_, opt) => formik.setFieldValue('assignee', opt?.key)}
             styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6 } }}
           />
@@ -252,6 +277,8 @@ function AddTaskPanel() {
             label="Description"
             multiline
             rows={3}
+            errorMessage={formik.touched.description ? formik.errors.description : undefined}
+            required
             value={formik.values.description}
             onChange={(_, val) => formik.setFieldValue('description', val)}
             styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
@@ -259,6 +286,7 @@ function AddTaskPanel() {
 
           <input
             type="file"
+            required
             onChange={e => {
               const f = e.currentTarget.files?.[0] || null;
               formik.setFieldValue('file', f);

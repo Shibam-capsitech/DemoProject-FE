@@ -1,5 +1,11 @@
 import React from 'react';
-import { Stack, Text, FontIcon, DefaultButton, Persona, PersonaSize } from '@fluentui/react';
+import {
+  Stack,
+  Text,
+  FontIcon,
+  Persona,
+  PersonaSize
+} from '@fluentui/react';
 import Layout from '../components/Layout/Layout';
 
 const cardData = [
@@ -16,91 +22,87 @@ const recentTasks = [
 ];
 
 const topTechnicians = [
-  { name: 'Amit Roy', role: 'Technician', tasksDone: 42 },
-  { name: 'Meena Das', role: 'Technician', tasksDone: 37 },
+  { name: 'Amit Roy', role: 'Staff', tasksDone: 42 },
+  { name: 'Meena Das', role: 'Manager', tasksDone: 37 },
 ];
 
 const Dashboard: React.FC = () => {
   return (
     <Layout>
-      <Stack tokens={{ childrenGap: 24 }} styles={{ root: { padding: 24 } }}>
-        {/* Top Cards */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: 20,
-          }}
-        >
-          {cardData.map(card => (
-            <div
-              key={card.title}
-              style={{
-                background: '#ffffff',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
-                borderRadius: 12,
-                padding: 20,
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'flex-start',
-              }}
-            >
-              <FontIcon iconName={card.icon} style={{ fontSize: 32, marginBottom: 10, color: '#0078d4' }} />
-              <Text variant="xLarge" styles={{ root: { fontWeight: 600 } }}>
-                {card.value}
-              </Text>
-              <Text variant="mediumPlus" styles={{ root: { color: '#666666' } }}>
-                {card.title}
-              </Text>
-            </div>
-          ))}
-        </div>
+      <Stack tokens={{ childrenGap: 32 }} styles={{ root: { padding: 32, paddingTop: 20 } }}>
 
-        {/* Recent Tasks */}
-        <div>
-          <Text variant="xLarge" styles={{ root: { marginBottom: 20 } }}>
-            Recent Tasks
-          </Text>
+        <Stack>
+          <Text variant="xLarge" styles={{ root: { marginBottom: 16 } }}>Overview</Text>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: 20,
+            }}
+          >
+            {cardData.map(card => (
+              <div
+                key={card.title}
+                style={{
+                  background: '#ffffff',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                  borderRadius: 12,
+                  padding: 20,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 6,
+                }}
+              >
+                <FontIcon iconName={card.icon} style={{ fontSize: 30, color: '#0078d4' }} />
+                <Text variant="xxLarge" styles={{ root: { fontWeight: 600 } }}>{card.value}</Text>
+                <Text variant="mediumPlus" styles={{ root: { color: '#666' } }}>{card.title}</Text>
+              </div>
+            ))}
+          </div>
+        </Stack>
+
+        <Stack>
+          <Text variant="xLarge" styles={{ root: { marginBottom: 16 } }}>Recent Tasks</Text>
           <Stack tokens={{ childrenGap: 12 }}>
             {recentTasks.map((task, index) => (
               <Stack
                 key={index}
                 horizontal
                 horizontalAlign="space-between"
+                verticalAlign="center"
                 styles={{
                   root: {
-                    background: '#f9f9f9',
-                    padding: '12px 16px',
+                    background: '#f5f5f5',
+                    padding: '12px 20px',
                     borderRadius: 8,
                     boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
                   },
                 }}
               >
-                <Text>{task.title}</Text>
-                <Text>{task.assignee} – {task.status}</Text>
+                <Text variant="mediumPlus">{task.title}</Text>
+                <Text variant="medium" styles={{ root: { color: '#555' } }}>
+                  {task.assignee} – <strong>{task.status}</strong>
+                </Text>
               </Stack>
             ))}
           </Stack>
-        </div>
+        </Stack>
 
-        {/* Top Technicians */}
-        <div>
-          <Text variant="xLarge" styles={{ root: { marginBottom: 12 } }}>
-            Top Performers
-          </Text>
+        <Stack>
+          <Text variant="xLarge" styles={{ root: { marginBottom: 16 } }}>Top Performers</Text>
           <Stack tokens={{ childrenGap: 12 }}>
             {topTechnicians.map((tech, index) => (
               <Stack
                 key={index}
                 horizontal
                 verticalAlign="center"
-                tokens={{ childrenGap: 12 }}
+                tokens={{ childrenGap: 16 }}
                 styles={{
                   root: {
                     background: '#ffffff',
-                    padding: 12,
+                    padding: 16,
                     borderRadius: 8,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
                   },
                 }}
               >
@@ -110,13 +112,14 @@ const Dashboard: React.FC = () => {
                   size={PersonaSize.size40}
                   hidePersonaDetails={false}
                 />
-                <Text variant="mediumPlus" styles={{ root: { marginLeft: 'auto' } }}>
+                <Text variant="mediumPlus" styles={{ root: { marginLeft: 'auto', fontWeight: 500 } }}>
                   Tasks Done: {tech.tasksDone}
                 </Text>
               </Stack>
             ))}
           </Stack>
-        </div>
+        </Stack>
+        
       </Stack>
     </Layout>
   );

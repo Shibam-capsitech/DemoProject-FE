@@ -37,7 +37,14 @@ function AddBusinessPanel({ onSuccess }: { onSuccess?: () => void }) {
             state: '',
         },
         onSubmit: async (values) => {
-
+            const requiredFields = ['type', 'name', 'building', 'city', 'state', 'country', 'postcode'];
+            const missing = requiredFields.filter(field => !values[field as keyof typeof values]);
+console.log('Form Values:', values);
+            if (missing.length > 0) {
+                console.log('Form Values:,.............');
+                toast.error(`Please fill in all required fields: ${missing.join(', ')}`);
+                return;
+            }
             try {
                 const formData = new FormData();
                 formData.append("type", values.type);
@@ -103,7 +110,7 @@ function AddBusinessPanel({ onSuccess }: { onSuccess?: () => void }) {
                 closeButtonAriaLabel="Close"
                 onRenderFooterContent={onRenderFooterContent}
                 isFooterAtBottom={true}
-                styles={{ main: { fontWeight: 400, minWidth: '700px' } }}
+                styles={{ main: { fontWeight: 400, minWidth: '700px', } }}
             >
                 <form
                     onSubmit={formik.handleSubmit}
