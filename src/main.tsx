@@ -11,7 +11,7 @@ createRoot(document.getElementById('root')!).render(
     <UserProvider>
       <RefreshProvider>
     <App />
-    <ToastContainer autoClose={5}/>
+    <ToastContainer autoClose={1000}/>
     </RefreshProvider>
     </UserProvider>
   </StrictMode>,

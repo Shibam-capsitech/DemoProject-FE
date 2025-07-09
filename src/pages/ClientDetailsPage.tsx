@@ -20,6 +20,7 @@ import apiService from '../api/apiService';
 import { useParams } from 'react-router-dom';
 import { useBoolean } from '@fluentui/react-hooks';
 import EditBusinessPanel from '../components/EditBusinessPanel';
+import { useRefresh } from '../context/RefreshContext';
 
 const clientData = {
     avatar: '/image.png',
@@ -59,6 +60,7 @@ const ClientDetailsPage: React.FC = () => {
     const [taskView, setTaskView] = useState<'upcoming' | 'completed'>('upcoming');
     const [businessData, setBusinessData] = useState<any>(null);
     const { businessId } = useParams<{ businessId: string }>();
+    const { refresh } = useRefresh()
     const filteredTasks = useMemo(
         () => tasks.filter(t => taskView === 'upcoming' ? t.status !== 'Completed' : t.status === 'Completed'),
         [taskView]
@@ -80,7 +82,7 @@ const ClientDetailsPage: React.FC = () => {
     useEffect(() => {
         if (businessId)
             fetchBusinessDetails(businessId)
-    }, [businessId])
+    }, [businessId, refresh])
     const [isEditOpen, { setTrue: openEditPanel, setFalse: dismissEditPanel }] = useBoolean(false);
 
     return (

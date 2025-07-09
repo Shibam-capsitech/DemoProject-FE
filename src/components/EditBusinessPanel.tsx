@@ -51,16 +51,11 @@ function EditBusinessPanel({
                 Object.entries(values).forEach(([key, val]) => {
                     formData.append(key, val);
                 });
-                formData.append("_id", businessId);
 
-                const res = await apiService.post('/Business/edit-business', formData);
-                if (res === 'Business updated successfully') {
-                    toast.success('Business updated successfully!');
-                    toggleRefresh();
-                    onDismiss();
-                } else {
-                    toast.error('Failed to update business');
-                }
+                const res = await apiService.post(`/Business/update-business-by-id/${businessId}`, formData);
+                toast.success('Business updated successfully!');
+                toggleRefresh();
+                onDismiss();
             } catch (err: any) {
                 toast.error(err?.response?.data || 'Error updating business');
             } finally {
