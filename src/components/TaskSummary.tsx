@@ -61,7 +61,7 @@ const labelStyle = { fontWeight: '600', color: '#666', fontSize: 14 };
 const valueStyle = { fontSize: 16, fontWeight: '500' };
 
 const TaskSummary: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { taskId } = useParams<{ taskId: string }>();
   const [task, setTask] = useState<any>(null);
   const [isPanelOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
   const [businessOptions, setBusinessOptions] = useState<IDropdownOption[]>([]);
@@ -72,7 +72,7 @@ const TaskSummary: React.FC = () => {
 
   const fetchTask = async () => {
     try {
-      const res = await apiService.get(`/Task/get-task-by-id/${id}`);
+      const res = await apiService.get(`/Task/get-task-by-id/${taskId}`);
       setTask(res.task);
     } catch (error) {
       console.error('Error fetching task:', error);
@@ -93,8 +93,10 @@ const TaskSummary: React.FC = () => {
       assignee: task?.assignee || '',
     },
     onSubmit: async (values) => {
+      const businessIdForTask = task.businessId
       try {
-        const res = await apiService.post(`/Task/update-task/${id}`, { id, ...values });
+        const res = await await apiService.post(`/Task/update-task/?taskId=${taskId}&businessId=${businessIdForTask}`, values);
+
         console.log('Task updated:', res);
         dismissPanel();
         fetchTask();
@@ -106,7 +108,7 @@ const TaskSummary: React.FC = () => {
   });
 
   useEffect(() => {
-    if (id) fetchTask();
+    if (taskId) fetchTask();
 
     const fetchBusinesses = async () => {
       try {
@@ -138,7 +140,7 @@ const TaskSummary: React.FC = () => {
 
     fetchBusinesses();
     fetchUsers();
-  }, [id]);
+  }, [taskId]);
 
 
   const formatDate = (date: string | Date) => new Date(date).toLocaleDateString('en-GB');

@@ -8,112 +8,114 @@ import AddBusinessPanel from '../components/AddBusinessPanel';
 import apiService from '../api/apiService';
 import { toast } from 'react-toastify';
 import { useRefresh } from '../context/RefreshContext';
+import { useNavigate } from 'react-router-dom';
 
-const columns = [
-  {
-    key: 'bId',
-    name: 'Client ID',
-    fieldName: 'bId',
-    minWidth: 100,
-    isResizable: true,
-    onRender: (item: any) => (
-      <span
-        style={{
-          fontFamily: 'monospace',
-          backgroundColor: '#d4f4dd',
-          color: '#1b5e20',
-          padding: '2px 6px',
-          borderRadius: 4,
-          display: 'inline-block',
-        }}
-      >
-        {item.bId}
-      </span>
-    ),
-  },
-  {
-    key: 'type',
-    name: 'Type',
-    fieldName: 'type',
-    minWidth: 100,
-    isResizable: true,
-    onRender: (item: any) => <span style={{ color: '#555' }}>{item.type}</span>,
-  },
-  {
-    key: 'name',
-    name: 'Business Name',
-    fieldName: 'name',
-    minWidth: 200,
-    isResizable: true,
-    onRender: (item: any) => <span style={{ color: '#0078d4' }}>{item.name}</span>,
-  },
-  {
-    key: 'building',
-    name: 'Building',
-    fieldName: 'building',
-    minWidth: 150,
-    isResizable: true,
-    onRender: (item: any) => <span style={{ color: '#444' }}>{item.building}</span>,
-  },
-  {
-    key: 'city',
-    name: 'City',
-    fieldName: 'city',
-    minWidth: 100,
-    onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.city}</span>,
-  },
-  {
-    key: 'state',
-    name: 'State',
-    fieldName: 'state',
-    minWidth: 120,
-    onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.state}</span>,
-  },
-  {
-    key: 'country',
-    name: 'Country',
-    fieldName: 'country',
-    minWidth: 120,
-    onRender: (item: any) => <span>{item.country}</span>,
-  },
-  {
-    key: 'postcode',
-    name: 'Postcode',
-    fieldName: 'postcode',
-    minWidth: 100,
-    onRender: (item: any) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{item.postcode}</span>,
-  },
-  {
-    key: 'username',
-    name: 'Username',
-    fieldName: 'username',
-    minWidth: 150,
-    onRender: (item: any) => <span style={{ fontWeight: 500 }}>{item.username}</span>,
-  },
-  {
-    key: 'email',
-    name: 'Email',
-    fieldName: 'email',
-    minWidth: 180,
-    isResizable: true,
-    onRender: (item: any) => <span style={{ fontStyle: 'italic', color: '#444' }}>{item.email}</span>,
-  },
-  {
-    key: 'createdAt',
-    name: 'Created At',
-    fieldName: 'createdAt',
-    minWidth: 140,
-    onRender: (item: any) => (
-      <span style={{ color: '#888' }}>
-        {new Date(item.createdAt).toLocaleDateString('en-GB')}
-      </span>
-    ),
-  },
-];
 
 const ClientPage: React.FC = () => {
   const [clientData, setClientData] = useState<any[]>([]);
   const { refresh } = useRefresh()
+  const navigate = useNavigate()
+  const columns = [
+    {
+      key: 'bId',
+      name: 'Client ID',
+      fieldName: 'bId',
+      minWidth: 100,
+      isResizable: true,
+      onRender: (item: any) => (
+        <span
+          style={{
+            fontFamily: 'monospace',
+            backgroundColor: '#d4f4dd',
+            color: '#1b5e20',
+            padding: '2px 6px',
+            borderRadius: 4,
+            display: 'inline-block',
+          }}
+        >
+          {item.bId}
+        </span>
+      ),
+    },
+    {
+      key: 'type',
+      name: 'Type',
+      fieldName: 'type',
+      minWidth: 100,
+      isResizable: true,
+      onRender: (item: any) => <span style={{ color: '#555' }}>{item.type}</span>,
+    },
+    {
+      key: 'name',
+      name: 'Business Name',
+      fieldName: 'name',
+      minWidth: 200,
+      isResizable: true,
+      onRender: (item: any) => <span style={{ color: '#0078d4', cursor:"pointer" }} onClick={(e:any) => navigate(`/admin/clients/${item.id}`)}>{item.name}</span>,
+    },
+    {
+      key: 'building',
+      name: 'Building',
+      fieldName: 'building',
+      minWidth: 150,
+      isResizable: true,
+      onRender: (item: any) => <span style={{ color: '#444' }}>{item.building}</span>,
+    },
+    {
+      key: 'city',
+      name: 'City',
+      fieldName: 'city',
+      minWidth: 100,
+      onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.city}</span>,
+    },
+    {
+      key: 'state',
+      name: 'State',
+      fieldName: 'state',
+      minWidth: 120,
+      onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.state}</span>,
+    },
+    {
+      key: 'country',
+      name: 'Country',
+      fieldName: 'country',
+      minWidth: 120,
+      onRender: (item: any) => <span>{item.country}</span>,
+    },
+    {
+      key: 'postcode',
+      name: 'Postcode',
+      fieldName: 'postcode',
+      minWidth: 100,
+      onRender: (item: any) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{item.postcode}</span>,
+    },
+    {
+      key: 'username',
+      name: 'Username',
+      fieldName: 'username',
+      minWidth: 150,
+      onRender: (item: any) => <span style={{ fontWeight: 500 }}>{item.username}</span>,
+    },
+    {
+      key: 'email',
+      name: 'Email',
+      fieldName: 'email',
+      minWidth: 180,
+      isResizable: true,
+      onRender: (item: any) => <span style={{ fontStyle: 'italic', color: '#444' }}>{item.email}</span>,
+    },
+    {
+      key: 'createdAt',
+      name: 'Created At',
+      fieldName: 'createdAt',
+      minWidth: 140,
+      onRender: (item: any) => (
+        <span style={{ color: '#888' }}>
+          {new Date(item.createdAt).toLocaleDateString('en-GB')}
+        </span>
+      ),
+    },
+  ];
 
 
   const fetchClientData = async () => {

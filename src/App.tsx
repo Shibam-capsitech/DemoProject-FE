@@ -7,6 +7,7 @@ import NotFoundPage from "./pages/NotFoundPage";
 import Dashboard from "./pages/Dashboard";
 import TaskDetailsPage from "./pages/TaskDetailsPage";
 import ProtectedRoute from "./components/ProtectRoute";
+import ClientDetailsPage from "./pages/ClientDetailsPage";
 
 function App() {
   return (
@@ -33,6 +34,14 @@ function App() {
           }
         />
         <Route
+          path="/admin/clients/:businessId"
+          element={
+            <ProtectedRoute>
+              <ClientDetailsPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
           path="/admin/tasks"
           element={
             <ProtectedRoute>
@@ -41,7 +50,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/tasks/:id"
+          path="/admin/tasks/:taskId"
           element={
             <ProtectedRoute>
               <TaskDetailsPage />

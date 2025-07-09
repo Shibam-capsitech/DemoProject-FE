@@ -8,7 +8,7 @@ import {
   PivotItem,
 } from '@fluentui/react';
 import { useParams } from 'react-router-dom';
-import { Edit } from 'lucide-react';
+import { Edit, Plus } from 'lucide-react';
 import apiService from '../api/apiService';
 import { useRefresh } from '../context/RefreshContext';
 
@@ -35,9 +35,9 @@ interface TaskHistoryData {
 }
 
 const TaskHistory: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { taskId } = useParams<{ taskId: string }>();
   const [history, setHistory] = useState<TaskHistoryData[]>([]);
-  const {refresh} = useRefresh();
+  const { refresh } = useRefresh();
 
   const fetchTaskHistory = async (taskId: string) => {
     try {
@@ -49,10 +49,10 @@ const TaskHistory: React.FC = () => {
   };
 
   useEffect(() => {
-    if (id) {
-      fetchTaskHistory(id);
+    if (taskId) {
+      fetchTaskHistory(taskId);
     }
-  }, [id,refresh]);
+  }, [taskId, refresh]);
 
   return (
     <div style={{ width: "90%", margin: '0 auto' }}>
@@ -63,7 +63,7 @@ const TaskHistory: React.FC = () => {
               <Stack horizontal tokens={{ childrenGap: 12 }}>
                 <DefaultButton
                   text="Refresh"
-                  onClick={() => id && fetchTaskHistory(id)}
+                  onClick={() => taskId && fetchTaskHistory(taskId)}
                   styles={{ root: { marginTop: 15 } }}
                 />
               </Stack>
@@ -83,16 +83,32 @@ const TaskHistory: React.FC = () => {
                     }}
                   >
                     <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 8 }}>
-                      <Edit size={20} color="#0078d4" />
+                      {entry.changes.some(change => change.field.toLowerCase() === 'task created') ? (
+                        <Plus size={20} color="green" />
+                      ) : (
+                        <Edit size={20} color="#0078d4" />
+                      )}
                       <Text variant="medium">
-                        <b>{entry.userdetails.name}</b> updated task at{' '}
+                        {entry.changes.some(change => change.field.toLowerCase() === 'task created') ? (
+                          <><b>{entry.userdetails.name}</b> created task at{' '}</>
+                        ) : (
+                          <> <b>{entry.userdetails.name}</b> updated task at{' '}</>
+                        )}
+
                         <b>{new Date(entry.timestamp).toLocaleString('en-GB')}</b>
                       </Text>
                     </Stack>
 
-                    <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>
-                      Task updated with new details:
-                    </Text>
+                    {entry.changes.some(change => change.field.toLowerCase() === 'task created') ? (
+                      <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>
+                        Task created with new details:
+                      </Text>
+                    ) : (
+                      <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>
+                        Task updated with new details:
+                      </Text>
+                    )}
+
 
                     <Stack tokens={{ childrenGap: 4 }} styles={{ root: { paddingLeft: 28 } }}>
                       {entry.changes.map((change, index) => (
@@ -105,7 +121,25 @@ const TaskHistory: React.FC = () => {
                   </Stack>
                 ))
               ) : (
-                <Text>Loading or no history found...</Text>
+                <Stack
+                  horizontalAlign="center"
+                  verticalAlign="center"
+                  styles={{
+                    root: {
+                      padding: 16,
+                      border: '1px solid #ccc',
+                      borderRadius: 6,
+                      backgroundColor: '#f3f2f1',
+                      textAlign: 'center',
+                      color: '#605e5c',
+                    },
+                  }}
+                >
+                  <Text variant="mediumPlus" styles={{ root: { fontWeight: 500 } }}>
+                    Loading or no history found...
+                  </Text>
+                </Stack>
+
               )}
             </Stack>
           </PivotItem>

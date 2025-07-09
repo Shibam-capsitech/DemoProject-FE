@@ -157,7 +157,10 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapse }) => {
               key={logoutPath.key}
               horizontal
               verticalAlign="center"
-              onClick={() => navigate(logoutPath.route)}
+              onClick={() => {
+                sessionStorage.removeItem('token');
+                navigate(logoutPath.route);
+              }}
               styles={{
                 root: {
                   marginBottom: '10px',
