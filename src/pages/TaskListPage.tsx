@@ -16,6 +16,7 @@ const cellStyle: React.CSSProperties = {
   whiteSpace: 'nowrap',
   overflow: 'hidden',
   textOverflow: 'ellipsis',
+  width: "max-content",
 };
 
 const ClientPage: React.FC = () => {
@@ -32,6 +33,7 @@ const ClientPage: React.FC = () => {
       const res = await apiService.get('/Task/get-all-task');
       const data = res.tasks.map((t: any) => ({
         id: t._id,
+        tid: t.tid,
         type: t.type,
         businessName: t.businessDetails?.name || '',
         title: t.title,
@@ -52,10 +54,23 @@ const ClientPage: React.FC = () => {
 
   const columns = [
     {
-      key: 'id',
-      name: 'ID',
-      fieldName: 'id',
-      onRender: (item: any) => <span style={cellStyle}>{item.id}</span>,
+      key: 'tid',
+      name: 'Task ID',
+      fieldName: 'tid',
+      onRender: (item: any) => (
+        <span
+          style={{
+            fontFamily: 'monospace',
+            backgroundColor: '#d4f4dd',
+            color: '#1b5e20',
+            padding: '2px 6px',
+            borderRadius: 4,
+            display: 'inline-block',
+          }}
+        >
+          {item.tid}
+        </span>
+      ),
     },
     {
       key: 'title',
