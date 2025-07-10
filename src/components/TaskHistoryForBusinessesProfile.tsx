@@ -135,6 +135,7 @@ const TaskHistory: React.FC = () => {
                   margin: '0 auto',
                 },
               }}
+              
               tokens={{ childrenGap: 12 }}
             >
               <Info size={24} color="#605e5c" />

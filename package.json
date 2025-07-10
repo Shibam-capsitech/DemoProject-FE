@@ -13,6 +13,7 @@
     "@capsitech/fluentui": "^0.1.18",
     "@fluentui/react": "^8.123.1",
     "@fluentui/react-hooks": "^8.8.19",
+    "date-fns": "^4.1.0",
     "formik": "^2.4.6",
     "jwt-decode": "^4.0.0",
     "lucide-react": "^0.525.0",

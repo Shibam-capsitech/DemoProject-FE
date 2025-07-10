@@ -154,7 +154,7 @@ const TaskSummary: React.FC = () => {
           <Text styles={{ root: labelStyle }}>Task name</Text>
           <Link styles={{ root: { ...valueStyle, color: '#0078d4', fontSize: 16 } }}>{task.title || 'N/A'}</Link>
         </Stack>
-        {role!=="Staff" && <DefaultButton onClick={openPanel} styles={{ root: { border: "none" } }} > <Edit size={30} />  </DefaultButton>}
+        {role!=="Staff" && <DefaultButton onClick={openPanel} styles={{ root: { border: "none",padding:0 } }} > <Edit size={20} />  </DefaultButton>}
       </Stack>
 
       <Stack tokens={{ childrenGap: 6 }}>
