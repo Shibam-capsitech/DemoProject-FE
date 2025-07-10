@@ -5,12 +5,14 @@ import {
   DefaultButton,
   Pivot,
   PivotItem,
+  IconButton,
 } from '@fluentui/react';
 import { useParams } from 'react-router-dom';
-import { Edit, Plus, Trash2 } from 'lucide-react';
+import { ChevronsDown, ChevronsUp, Edit, Plus, Trash2 } from 'lucide-react';
 import apiService from '../api/apiService';
 import { useRefresh } from '../context/RefreshContext';
 import { differenceInSeconds, parseISO } from 'date-fns';
+import { ChevronUp, ChevronDown } from 'lucide-react';
 
 interface TaskChange {
   field: string;
@@ -41,7 +43,9 @@ const TaskHistory: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const [history, setHistory] = useState<TaskHistoryData[]>([]);
   const { refresh } = useRefresh();
-
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const pageSize = 6; // number of history items visible per page
+  const paginatedHistory = history.slice(currentIndex, currentIndex + pageSize);
 
   const groupByTime = (histories: TaskHistoryData[]) => {
     if (!histories || histories.length === 0) return [];
@@ -73,7 +77,7 @@ const TaskHistory: React.FC = () => {
       }
     }
 
-    grouped.push(currentGroup); // push last group
+    grouped.push(currentGroup); 
     return grouped;
   };
 
@@ -101,98 +105,127 @@ const TaskHistory: React.FC = () => {
         <Pivot>
           <PivotItem headerText="History">
             <Stack tokens={{ childrenGap: 12 }}>
-              <Stack horizontal tokens={{ childrenGap: 12 }}>
+              <Stack
+                horizontal
+                horizontalAlign="space-between"
+                verticalAlign="center"
+                styles={{ root: { width: '100%' } }}
+              >
                 <DefaultButton
                   text="Refresh"
                   onClick={() => taskId && fetchTaskHistory(taskId)}
                   styles={{ root: { marginTop: 15 } }}
                 />
+
+                <Stack horizontal tokens={{ childrenGap: 8 }} styles={{ root: { marginTop: 15 } }}>
+                  <IconButton
+                    disabled={currentIndex === 0}
+                    onClick={() => setCurrentIndex(prev => Math.max(prev - pageSize, 0))}
+                  >
+                    <ChevronsUp />
+                  </IconButton>
+
+                  <IconButton
+                    disabled={currentIndex + pageSize >= history.length}
+                    onClick={() =>
+                      setCurrentIndex(prev => Math.min(prev + pageSize, history.length - pageSize))
+                    }
+                  >
+                    <ChevronsDown />
+                  </IconButton>
+                </Stack>
               </Stack>
 
+
               {history.length > 0 ? (
-                history.map((entry) => (
-                  <Stack
-                    key={entry.id}
-                    tokens={{ childrenGap: 8 }}
-                    styles={{
-                      root: {
-                        padding: '12px',
-                        border: '1px solid #eaeaea',
-                        borderRadius: 6,
-                        backgroundColor: '#f9f9f9',
-                      },
-                    }}
-                  >
-                    <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 8 }}>
-                      {(() => {
-                        const isTaskChange = entry.changes.every(c => !c.isChangeRegardingSubTask);
-                        const isSubTaskChange = entry.changes.some(c => c.isChangeRegardingSubTask);
-                        const isCreated = entry.changes.some(c => c.field.toLowerCase().includes('created'));
-                        const isDeleted = entry.changes.some(c => c.field.toLowerCase().includes('deleted'));
+                <>
+                  <Stack tokens={{ childrenGap: 8 }}>
+                    {paginatedHistory.map((entry) => (
+                      <Stack
+                        key={entry.id}
+                        tokens={{ childrenGap: 8 }}
+                        styles={{
+                          root: {
+                            padding: '12px',
+                            border: '1px solid #eaeaea',
+                            borderRadius: 6,
+                            backgroundColor: '#f9f9f9',
+                          },
+                        }}
+                      >
+                        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 8 }}>
+                          {(() => {
+                            const isTaskChange = entry.changes.every(c => !c.isChangeRegardingSubTask);
+                            const isSubTaskChange = entry.changes.some(c => c.isChangeRegardingSubTask);
+                            const isCreated = entry.changes.some(c => c.field.toLowerCase().includes('created'));
+                            const isDeleted = entry.changes.some(c => c.field.toLowerCase().includes('deleted'));
 
-                        let icon = <Edit size={20} color="#0078d4" />;
-                        let message = `${entry.userdetails.name} updated task at `;
-                        let color = "#0078d4";
-                        if (isTaskChange && isCreated) {
-                          icon = <Plus size={20} color="#2E7D32" />; // Green
-                          message = `${entry.userdetails.name} created task at `;
-                          color = "#4CAF50";
-                        } else if (isSubTaskChange && isCreated) {
-                          icon = <Plus size={20} color="#00897B" />; // Teal
-                          message = `${entry.userdetails.name} added subtask at `;
-                          color = "#26A69A";
-                        } else if (isSubTaskChange && isDeleted) {
-                          icon = <Trash2 size={20} color="#C62828" />; // Red
-                          message = `${entry.userdetails.name} deleted subtask at `;
-                          color = "#EF5350";
-                        } else if (isSubTaskChange) {
-                          icon = <Edit size={20} color="#EF6C00" />; // Orange
-                          message = `${entry.userdetails.name} updated subtask at `;
-                          color = "#FFB74D";
-                        } else {
-                          icon = <Edit size={20} color="#1565C0" />; // Blue
-                          message = `${entry.userdetails.name} updated task at `;
-                          color = "#42A5F5";
-                        }
+                            let icon = <Edit size={20} color="#0078d4" />;
+                            let message = `${entry.userdetails.name} updated task at `;
+                            let color = "#0078d4";
+                            if (isTaskChange && isCreated) {
+                              icon = <Plus size={20} color="#2E7D32" />;
+                              message = `${entry.userdetails.name} created task at `;
+                              color = "#4CAF50";
+                            } else if (isSubTaskChange && isCreated) {
+                              icon = <Plus size={20} color="#00897B" />;
+                              message = `${entry.userdetails.name} added subtask at `;
+                              color = "#26A69A";
+                            } else if (isSubTaskChange && isDeleted) {
+                              icon = <Trash2 size={20} color="#C62828" />;
+                              message = `${entry.userdetails.name} deleted subtask at `;
+                              color = "#EF5350";
+                            } else if (isSubTaskChange) {
+                              icon = <Edit size={20} color="#EF6C00" />;
+                              message = `${entry.userdetails.name} updated subtask at `;
+                              color = "#FFB74D";
+                            } else {
+                              icon = <Edit size={20} color="#1565C0" />;
+                              message = `${entry.userdetails.name} updated task at `;
+                              color = "#42A5F5";
+                            }
 
+                            return (
+                              <>
+                                {icon}
+                                <Text variant="medium" styles={{ root: { color } }}>
+                                  {message}
+                                  {new Date(entry.timestamp).toLocaleString('en-GB')}
+                                </Text>
+                              </>
+                            );
+                          })()}
+                        </Stack>
 
-                        return (
-                          <>
-                            {icon}
-                            <Text variant="medium" styles={{ root: { color } }}>
-                              {message}
-                              {new Date(entry.timestamp).toLocaleString('en-GB')}
+                        {(() => {
+                          const isTaskChange = entry.changes.every(c => !c.isChangeRegardingSubTask);
+                          const isCreated = entry.changes.some(c => c.field.toLowerCase().includes('created'));
+
+                          if (isTaskChange && isCreated)
+                            return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Task created with details:</Text>;
+                          if (isTaskChange)
+                            return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Task updated with changes:</Text>;
+                          if (!isTaskChange && isCreated)
+                            return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Subtask created with details:</Text>;
+                          if (!isTaskChange && entry.changes.some(c => c.field.toLowerCase().includes('deleted')))
+                            return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Subtask was deleted:</Text>;
+                          return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Subtask updated with changes:</Text>;
+                        })()}
+
+                        <Stack tokens={{ childrenGap: 4 }} styles={{ root: { paddingLeft: 28 } }}>
+                          {entry.changes.map((change, index) => (
+                            <Text key={index} variant="medium">
+                              <b>{change.field.charAt(0).toUpperCase() + change.field.slice(1)}:</b>{' '}
+                              {change.previous} → {change.newval}
                             </Text>
-                          </>
-                        );
-                      })()}
-                    </Stack>
-
-                    {(() => {
-                      const isTaskChange = entry.changes.every(c => !c.isChangeRegardingSubTask);
-                      const isCreated = entry.changes.some(c => c.field.toLowerCase().includes('created'));
-
-                      if (isTaskChange && isCreated)
-                        return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Task created with details:</Text>;
-                      if (isTaskChange)
-                        return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Task updated with changes:</Text>;
-                      if (!isTaskChange && isCreated)
-                        return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Subtask created with details:</Text>;
-                      if (!isTaskChange && entry.changes.some(c => c.field.toLowerCase().includes('deleted')))
-                        return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Subtask was deleted:</Text>;
-                      return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Subtask updated with changes:</Text>;
-                    })()}
-
-                    <Stack tokens={{ childrenGap: 4 }} styles={{ root: { paddingLeft: 28 } }}>
-                      {entry.changes.map((change, index) => (
-                        <Text key={index} variant="medium">
-                          <b>{change.field.charAt(0).toUpperCase() + change.field.slice(1)}:</b>{' '}
-                          {change.previous} → {change.newval}
-                        </Text>
-                      ))}
-                    </Stack>
+                          ))}
+                        </Stack>
+                      </Stack>
+                    ))}
                   </Stack>
-                ))
+
+
+                </>
               ) : (
                 <Stack
                   horizontalAlign="center"

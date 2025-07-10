@@ -14,6 +14,7 @@ import {
   type IDatePickerStyles,
   type IStyleFunctionOrObject,
   type IDatePickerStyleProps,
+  IconButton,
 } from '@fluentui/react';
 import { useParams } from 'react-router-dom';
 import { useBoolean } from '@fluentui/react-hooks';
@@ -154,7 +155,7 @@ const TaskSummary: React.FC = () => {
           <Text styles={{ root: labelStyle }}>Task name</Text>
           <Link styles={{ root: { ...valueStyle, color: '#0078d4', fontSize: 16 } }}>{task.title || 'N/A'}</Link>
         </Stack>
-        {role!=="Staff" && <DefaultButton onClick={openPanel} styles={{ root: { border: "none",padding:0 } }} > <Edit size={20} />  </DefaultButton>}
+        {role!=="Staff" && <IconButton onClick={openPanel} styles={{ root: { border: "none",padding:0, color:"black" } }} > <Edit size={20} />  </IconButton>}
       </Stack>
 
       <Stack tokens={{ childrenGap: 6 }}>
