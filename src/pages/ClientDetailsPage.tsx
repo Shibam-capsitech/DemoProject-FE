@@ -22,53 +22,46 @@ import { useBoolean } from '@fluentui/react-hooks';
 import EditBusinessPanel from '../components/EditBusinessPanel';
 import { useRefresh } from '../context/RefreshContext';
 
-const clientData = {
-    avatar: '/image.png',
-    name: 'Chatterjee Private Limited',
-    code: 'LA-209',
-    email: 'sunil.jangid@capsitech.com',
-    phone: '+447798654565',
-    address: '8/2 Main Building, Rishra, West Bengal, 712248, India',
-    tradingAddress: 'Rishra, West Bengal, India',
-    defaultContact: 'Lousie Harrison',
-    incorporationDate: null,
-    authCode: '6BPPNX',
-    utr: '9874022701',
-    vatNo: '494825018',
-    vatRegDate: '31/07/2016',
-    vatStatus: 'Registered',
-    vatScheme: 'Accrual Based',
-    vatFrequency: 'Monthly',
-    payeRef: '123/PA48946',
-    type: 'Individual',
-    building: '8/2 Main Building',
-    city: 'Rishra',
-    state: 'West Bengal',
-    country: 'India',
-    postcode: '712248'
-};
-const tasks = [
-    { name: 'SA100 for All Directors', date: '30/06/2022', status: 'Overdue' },
-    { name: 'Review employee details', date: '13/02/2023', status: 'Overdue' },
-    { name: 'Company Accounts and CT600', date: '15/04/2023', status: 'Overdue' },
-    { name: 'Review employee details', date: '06/05/2023', status: 'Overdue' },
-    { name: 'Confirmation Statement', date: '24/08/2023', status: 'Overdue' },
-    { name: 'Payment for invoice #INV-1201', date: '18/11/2023', status: 'Overdue' },
-];
 
 const ClientDetailsPage: React.FC = () => {
     const [taskView, setTaskView] = useState<'upcoming' | 'completed'>('upcoming');
     const [businessData, setBusinessData] = useState<any>(null);
     const { businessId } = useParams<{ businessId: string }>();
     const { refresh } = useRefresh()
-    const filteredTasks = useMemo(
-        () => tasks.filter(t => taskView === 'upcoming' ? t.status !== 'Completed' : t.status === 'Completed'),
-        [taskView]
-    );
+    // const filteredTasks = useMemo(
+    //     () => tasks.filter(t => taskView === 'upcoming' ? t.status !== 'Completed' : t.status === 'Completed'),
+    //     [taskView]
+    // );
 
     const taskColumns: IColumn[] = [
-        { key: 'name', name: 'Task', fieldName: 'name', minWidth: 180 },
-        { key: 'date', name: 'Due Date', fieldName: 'date', minWidth: 100 },
+        { key: 'title', name: 'Task', fieldName: 'title', minWidth: 180, },
+        { key: 'dueDate', name: 'Due Date', fieldName: 'dueDate', minWidth: 100, onRender: (item) => item?.dueDate ? new Date(item.dueDate).toLocaleDateString() : 'N/A' },
+        {
+            key: 'status',
+            name: 'Status',
+            minWidth: 120,
+            onRender: (item) => {
+                const allCompleted =
+                    item?.subTask?.length > 0 &&
+                    item.subTask.every((sub: any) => sub.status === 'Completed');
+
+                return (
+                    <Text
+                        styles={{
+                            root: {
+                                padding: '4px 8px',
+                                borderRadius: 4,
+                                backgroundColor: allCompleted ? '#dff0d8' : '#f8d7da',
+                                color: allCompleted ? '#3c763d' : '#721c24',
+                                display: 'inline-block',
+                            },
+                        }}
+                    >
+                        {allCompleted ? 'Completed' : 'Not Completed'}
+                    </Text>
+                );
+            },
+        }
     ];
 
     const fetchBusinessDetails = async (businessId: string) => {
@@ -79,16 +72,30 @@ const ClientDetailsPage: React.FC = () => {
             console.error('Failed to fetch business details:', error);
         }
     }
+
+    const [tasksData, setTasksData] = useState<any[]>([]);
+    const fetchTasks = async (businessId: string) => {
+        try {
+            const response = await apiService.get(`/Task/get-tasks-by-business-id/${businessId}`);
+            setTasksData(response.tasks || []);
+        } catch (error) {
+            console.error('Failed to fetch tasks:', error);
+            return [];
+        }
+    }
     useEffect(() => {
-        if (businessId)
+        if (businessId) {
+            fetchTasks(businessId)
             fetchBusinessDetails(businessId)
+        }
+
     }, [businessId, refresh])
     const [isEditOpen, { setTrue: openEditPanel, setFalse: dismissEditPanel }] = useBoolean(false);
 
     return (
         <Layout>
-            <Stack horizontal styles={{ root: { width: '100%', padding: 0, borderTop: "1px solid #f4f4f4" } }} tokens={{ childrenGap: 16 }}>
-                <Stack styles={{ root: { flex: 3, borderRight: "1px solid #f4f4f4", padding: 10, marginTop: 12, height: "100vh" } }} tokens={{ childrenGap: 16 }}>
+            <Stack horizontal styles={{ root: { width: '100%', borderTop: "1px solid #f4f4f4" } }} tokens={{ childrenGap: 16 }}>
+                <Stack styles={{ root: { flex: 3, borderRight: "1px solid #f4f4f4", paddingRight: 12, marginTop: 12, height: "100vh" } }} tokens={{ childrenGap: 16 }}>
                     <Stack styles={{ root: { display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 8 } }}>
                         <img
                             src="/image.png"
@@ -110,7 +117,7 @@ const ClientDetailsPage: React.FC = () => {
                     </Stack>
 
                     <Pivot>
-                        <PivotItem headerText="Profile">
+                        <PivotItem headerText="Profile" >
                             <Stack
                                 styles={{
                                     root: {
@@ -127,49 +134,46 @@ const ClientDetailsPage: React.FC = () => {
                                     <Text variant="large" styles={{ root: { fontWeight: 600, marginBottom: 8 } }}>
                                         Business details
                                     </Text>
-                                    <DefaultButton onClick={openEditPanel} styles={{ root: { border: "none", backgroundColor: "transparent", } }} ><Edit /></DefaultButton>
+                                    <DefaultButton
+                                        onClick={openEditPanel}
+                                        styles={{ root: { border: "none", backgroundColor: "transparent" } }}
+                                    >
+                                        <Edit />
+                                    </DefaultButton>
                                 </Stack>
                                 <EditBusinessPanel businessId={businessId ?? ''} isOpen={isEditOpen} onDismiss={dismissEditPanel} />
 
-
-                                <Stack horizontal tokens={{ childrenGap: 16 }}>
-                                    <Stack grow={1} tokens={{ childrenGap: 12 }}>
-                                        <Stack tokens={{ childrenGap: 4 }}>
-                                            <Text variant="mediumPlus">Type</Text>
-                                            <Text>{businessData?.type}</Text>
-                                        </Stack>
-                                        <Stack tokens={{ childrenGap: 4 }}>
-                                            <Text variant="mediumPlus">Building</Text>
-                                            <Text>{businessData?.building}</Text>
-                                        </Stack>
+                                <Stack horizontal horizontalAlign='space-between' wrap tokens={{ childrenGap: 16 }}>
+                                    <Stack grow tokens={{ childrenGap: 4 }}>
+                                        <Text variant="mediumPlus">Type</Text>
+                                        <Text>{businessData?.type}</Text>
                                     </Stack>
-
-                                    <Stack grow={1} tokens={{ childrenGap: 12 }}>
-                                        <Stack tokens={{ childrenGap: 4 }}>
-                                            <Text variant="mediumPlus">City</Text>
-                                            <Text>{businessData?.city}</Text>
-                                        </Stack>
-                                        <Stack tokens={{ childrenGap: 4 }}>
-                                            <Text variant="mediumPlus">State</Text>
-                                            <Text>{businessData?.state}</Text>
-                                        </Stack>
+                                    <Stack grow tokens={{ childrenGap: 4 }}>
+                                        <Text variant="mediumPlus">Building</Text>
+                                        <Text>{businessData?.building}</Text>
                                     </Stack>
-
-                                    <Stack grow={1} tokens={{ childrenGap: 12 }}>
-                                        <Stack tokens={{ childrenGap: 4 }}>
-                                            <Text variant="mediumPlus">Country</Text>
-                                            <Text>{businessData?.country}</Text>
-                                        </Stack>
+                                    <Stack grow tokens={{ childrenGap: 4 }}>
+                                        <Text variant="mediumPlus">City</Text>
+                                        <Text>{businessData?.city}</Text>
                                     </Stack>
+                                </Stack>
 
-                                    <Stack grow={1} tokens={{ childrenGap: 12 }}>
-                                        <Stack tokens={{ childrenGap: 4 }}>
-                                            <Text variant="mediumPlus">Postcode</Text>
-                                            <Text>{businessData?.postcode}</Text>
-                                        </Stack>
+                                <Stack horizontal wrap tokens={{ childrenGap: 16 }}>
+                                    <Stack grow styles={{ root: { minWidth: 200 } }} tokens={{ childrenGap: 4 }}>
+                                        <Text variant="mediumPlus">State</Text>
+                                        <Text>{businessData?.state}</Text>
+                                    </Stack>
+                                    <Stack grow styles={{ root: { minWidth: 200 } }} tokens={{ childrenGap: 4 }}>
+                                        <Text variant="mediumPlus">Country</Text>
+                                        <Text>{businessData?.country}</Text>
+                                    </Stack>
+                                    <Stack grow styles={{ root: { minWidth: 200 } }} tokens={{ childrenGap: 4 }}>
+                                        <Text variant="mediumPlus">Postcode</Text>
+                                        <Text>{businessData?.postcode}</Text>
                                     </Stack>
                                 </Stack>
                             </Stack>
+
 
                             <Stack
                                 styles={{
@@ -184,7 +188,7 @@ const ClientDetailsPage: React.FC = () => {
                                 tokens={{ childrenGap: 20 }}
                             >
                                 <Text variant="large" styles={{ root: { fontWeight: 600, marginBottom: 8 } }}>
-                                    Owner details
+                                    Contact details
                                 </Text>
 
                                 <Stack horizontal tokens={{ childrenGap: 16 }}>
@@ -195,7 +199,7 @@ const ClientDetailsPage: React.FC = () => {
                                         </Stack>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Building</Text>
-                                            <Text>{clientData.building}</Text>
+                                            <Text>{businessData?.userDetails?.building}</Text>
                                         </Stack>
                                     </Stack>
 
@@ -235,7 +239,6 @@ const ClientDetailsPage: React.FC = () => {
                             </Stack>
                         </PivotItem>
 
-
                         <PivotItem headerText="History">
                             <TaskHistory />
                         </PivotItem>
@@ -257,11 +260,10 @@ const ClientDetailsPage: React.FC = () => {
                                 styles={{ root: { width: 120 } }}
                             />
                             <IconButton onClick={() => { }}><RefreshCw size={16} /></IconButton>
-                            <IconButton onClick={() => { }}><Plus size={16} /></IconButton>
                         </Stack>
                     </Stack>
                     <DetailsList
-                        items={filteredTasks}
+                        items={tasksData}
                         columns={taskColumns}
                         layoutMode={DetailsListLayoutMode.justified}
                         selectionMode={SelectionMode.none}

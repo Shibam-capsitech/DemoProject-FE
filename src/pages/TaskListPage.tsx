@@ -3,12 +3,14 @@ import CustomTable from '../components/DataTable';
 import Layout from '../components/Layout/Layout';
 import {
   DefaultButton,
+  type IDropdownOption,
 } from '@fluentui/react';
 import { Trash2, Edit2, Eye, RefreshCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AddTaskPanel from '../components/AddTaskPanel';
 import apiService from '../api/apiService';
 import { useRefresh } from '../context/RefreshContext';
+import { max } from 'date-fns';
 
 const cellStyle: React.CSSProperties = {
   fontSize: 14,
@@ -57,6 +59,7 @@ const ClientPage: React.FC = () => {
       key: 'tid',
       name: 'Task ID',
       fieldName: 'tid',
+      maxWidth: 100,
       onRender: (item: any) => (
         <span
           style={{
@@ -76,6 +79,7 @@ const ClientPage: React.FC = () => {
       key: 'title',
       name: 'Title',
       fieldName: 'title',
+      maxWidth: 200,
       onRender: (item: any) => (
         <span
           style={{
@@ -94,18 +98,21 @@ const ClientPage: React.FC = () => {
       key: 'type',
       name: 'Type',
       fieldName: 'type',
+      maxWidth: 300,
       onRender: (item: any) => <span style={cellStyle}>{item.type}</span>,
     },
     {
       key: 'businessName',
       name: 'Business Name',
       fieldName: 'businessName',
+      maxWidth: 200,
       onRender: (item: any) => <span style={cellStyle}>{item.businessName}</span>,
     },
     {
       key: 'startDate',
       name: 'Start Date',
       fieldName: 'startDate',
+      maxWidth: 100,
       onRender: (item: any) => (
         <span style={cellStyle}>
           {new Date(item.startDate).toLocaleDateString('en-GB')}
@@ -116,6 +123,7 @@ const ClientPage: React.FC = () => {
       key: 'dueDate',
       name: 'Due Date',
       fieldName: 'dueDate',
+      maxWidth: 100,
       onRender: (item: any) => (
         <span style={cellStyle}>
           {new Date(item.dueDate).toLocaleDateString('en-GB')}
@@ -126,6 +134,7 @@ const ClientPage: React.FC = () => {
       key: 'deadline',
       name: 'Deadline',
       fieldName: 'deadline',
+      maxWidth: 100,
       onRender: (item: any) => (
         <span style={cellStyle}>
           {new Date(item.deadline).toLocaleDateString('en-GB')}
@@ -136,18 +145,14 @@ const ClientPage: React.FC = () => {
       key: 'priority',
       name: 'Priority',
       fieldName: 'priority',
+      maxWidth: 100,
       onRender: (item: any) => <span style={cellStyle}>{item.priority}</span>,
-    },
-    {
-      key: 'assignee',
-      name: 'Assignee',
-      fieldName: 'assignee',
-      onRender: (item: any) => <span style={cellStyle}>{item.assignee}</span>,
     },
     {
       key: 'description',
       name: 'Description',
       fieldName: 'description',
+       maxWidth: 400,
       onRender: (item: any) => <span style={cellStyle}>{item.description}</span>,
     },
     {
@@ -155,6 +160,13 @@ const ClientPage: React.FC = () => {
       name: 'Business ID',
       fieldName: 'businessId',
       onRender: (item: any) => <span style={cellStyle}>{item.businessId}</span>,
+    },
+        {
+      key: 'assignee',
+      name: 'Assignee',
+      fieldName: 'assignee',
+      maxWidth: 100,
+      onRender: (item: any) => <span style={cellStyle}>{item.assignee}</span>,
     },
     {
       key: 'file',
@@ -172,7 +184,22 @@ const ClientPage: React.FC = () => {
       ),
     },
   ];
-
+  const criteria: IDropdownOption[] = [
+    { key: 'type', text: 'Task Type' },
+  ];
+  const value: Record<string, IDropdownOption[]> = {
+    type:[
+          { key: 'Send Printed Incorporation Document', text: 'Send Printed Incorporation Document' },
+    { key: 'Confirmation Statement', text: 'Confirmation Statement' },
+    { key: 'VAT Return', text: 'VAT Return' },
+    { key: 'Dormant Company Accounts', text: 'Dormant Company Accounts' },
+    { key: 'HMRC Authorisation process', text: 'HMRC Authorisation process' },
+    { key: 'Weekly Payroll', text: 'Weekly Payroll' },
+    { key: 'Annual Payroll', text: 'Annual Payroll' },
+    { key: 'Monthly Bookkeeping', text: 'Monthly Bookkeeping' },
+    { key: 'VAT Registration', text: 'VAT Registration' },
+    ]
+  };
   return (
     <Layout>
       <CustomTable
@@ -180,6 +207,8 @@ const ClientPage: React.FC = () => {
         columns={columns}
         pageSize={10}
         onRowClick={(item) => console.log('Row clicked:', item)}
+        filterCriteria={criteria}
+        filterValue={value}
         actions={
           <div style={{ display: 'flex', gap: 8 }}>
             <AddTaskPanel />

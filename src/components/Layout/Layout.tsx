@@ -21,7 +21,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <main
                     style={{
                         flex: 1,
-                        padding: "24px",
+                        padding: "15px",
                         overflow: "auto",
                     }}
                 >

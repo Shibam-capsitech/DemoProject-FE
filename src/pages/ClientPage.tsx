@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import CustomTable from '../components/DataTable';
 import Layout from '../components/Layout/Layout';
-import { DefaultButton } from '@fluentui/react';
+import { DefaultButton, type IDropdownOption } from '@fluentui/react';
 import { Trash2, Edit2, Eye, RefreshCcw } from 'lucide-react';
 import AddBusinessPanel from '../components/AddBusinessPanel';
 import apiService from '../api/apiService';
@@ -20,7 +20,7 @@ const ClientPage: React.FC = () => {
       key: 'bId',
       name: 'Client ID',
       fieldName: 'bId',
-      minWidth: 100,
+      maxWidth: 100,
       isResizable: true,
       onRender: (item: any) => (
         <span
@@ -41,7 +41,7 @@ const ClientPage: React.FC = () => {
       key: 'type',
       name: 'Type',
       fieldName: 'type',
-      minWidth: 100,
+      maxWidth: 150,
       isResizable: true,
       onRender: (item: any) => <span style={{ color: '#555' }}>{item.type}</span>,
     },
@@ -49,15 +49,15 @@ const ClientPage: React.FC = () => {
       key: 'name',
       name: 'Business Name',
       fieldName: 'name',
-      minWidth: 200,
+      maxWidth: 260,
       isResizable: true,
-      onRender: (item: any) => <span style={{ color: '#0078d4', cursor:"pointer" }} onClick={(e:any) => navigate(`/admin/clients/${item.id}`)}>{item.name}</span>,
+      onRender: (item: any) => <span style={{ color: '#0078d4', cursor: "pointer" }} onClick={(e: any) => navigate(`/admin/clients/${item.id}`)}>{item.name}</span>,
     },
     {
       key: 'building',
       name: 'Building',
       fieldName: 'building',
-      minWidth: 150,
+      maxWidth: 200,
       isResizable: true,
       onRender: (item: any) => <span style={{ color: '#444' }}>{item.building}</span>,
     },
@@ -65,21 +65,21 @@ const ClientPage: React.FC = () => {
       key: 'city',
       name: 'City',
       fieldName: 'city',
-      minWidth: 100,
+      maxWidth: 200,
       onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.city}</span>,
     },
     {
       key: 'state',
       name: 'State',
       fieldName: 'state',
-      minWidth: 120,
+      minWidth: 200,
       onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.state}</span>,
     },
     {
       key: 'country',
       name: 'Country',
       fieldName: 'country',
-      minWidth: 120,
+      minWidth: 200,
       onRender: (item: any) => <span>{item.country}</span>,
     },
     {
@@ -93,7 +93,7 @@ const ClientPage: React.FC = () => {
       key: 'username',
       name: 'Username',
       fieldName: 'username',
-      minWidth: 150,
+      minWidth: 200,
       onRender: (item: any) => <span style={{ fontWeight: 500 }}>{item.username}</span>,
     },
     {
@@ -117,6 +117,22 @@ const ClientPage: React.FC = () => {
     },
   ];
 
+  const criteria: IDropdownOption[] = [
+    { key: 'type', text: 'Business Type' },
+    // { key: 'state', text: 'State' },
+  ];
+
+  const valueMap: Record<string, IDropdownOption[]> = {
+    type: [
+      { key: 'Individual', text: 'Individual' },
+      { key: 'Partnership', text: 'Partnership' },
+      { key: 'Limited Partnership', text: 'Limited Partnership' },
+    ],
+    // state: [
+    //   { key: 'active', text: 'Active' },
+    //   { key: 'In Active', text: 'In Active' },
+    // ],
+  };
 
   const fetchClientData = async () => {
     try {
@@ -156,6 +172,8 @@ const ClientPage: React.FC = () => {
         items={clientData}
         columns={columns}
         pageSize={10}
+        filterCriteria={criteria}
+        filterValue={valueMap}
         onRowClick={(item) => console.log('Row clicked:', item)}
         actions={
           <div style={{ display: 'flex', gap: 8 }}>
