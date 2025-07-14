@@ -39,7 +39,38 @@ const TaskHistory: React.FC = () => {
   const { refresh } = useRefresh();
   const [currentIndex, setCurrentIndex] = useState(0);
   const pageSize = 6;
-  const paginated = history.slice(currentIndex, currentIndex + pageSize);
+
+  const groupHistoryByTime = (entries: HistoryEntry[]): HistoryEntry[][] => {
+    const sorted = [...entries].sort((a, b) =>
+      new Date(a.createdBy.date).getTime() - new Date(b.createdBy.date).getTime()
+    );
+
+    const groups: HistoryEntry[][] = [];
+    let currentGroup: HistoryEntry[] = [];
+
+    for (let i = 0; i < sorted.length; i++) {
+      const current = sorted[i];
+      const prev = sorted[i - 1];
+
+      if (
+        i > 0 &&
+        new Date(current.createdBy.date).getTime() - new Date(prev.createdBy.date).getTime() < 1000
+      ) {
+        currentGroup.push(current);
+      } else {
+        if (currentGroup.length) groups.push(currentGroup);
+        currentGroup = [current];
+      }
+    }
+
+    if (currentGroup.length) {
+      groups.push(currentGroup);
+    }
+
+    return groups;
+  };
+  const groupedHistory = groupHistoryByTime(history);
+  const paginated = groupedHistory.slice(currentIndex, currentIndex + pageSize);
 
   const fetchTaskHistory = async (id: string) => {
     try {
@@ -99,9 +130,9 @@ const TaskHistory: React.FC = () => {
 
               {history.length > 0 ? (
                 <Stack tokens={{ childrenGap: 8 }}>
-                  {paginated.map((item) => (
+                  {paginated.map((group, index) => (
                     <Stack
-                      key={item.id}
+                      key={index}
                       tokens={{ childrenGap: 4 }}
                       styles={{
                         root: {
@@ -112,20 +143,22 @@ const TaskHistory: React.FC = () => {
                         },
                       }}
                     >
-                      <Stack horizontal verticalAlign="start" tokens={{ childrenGap: 8 }}>
-                        {getIconByChangeType(item.changeType)}
-                        <span
-                          style={{ fontSize: 14, color: "#333", lineHeight: 1.4 }}
-                          dangerouslySetInnerHTML={{ __html: item.description }}
-                        />
-                      </Stack>
-
+                      {group.map((item, subIndex) => (
+                        <Stack horizontal verticalAlign="start" tokens={{ childrenGap: 8 }} key={subIndex}>
+                          {getIconByChangeType(item.changeType)}
+                          <span
+                            style={{ fontSize: 14, color: "#333", lineHeight: 1.4 }}
+                            dangerouslySetInnerHTML={{ __html: item.description }}
+                          />
+                        </Stack>
+                      ))}
                       <Text variant="smallPlus" styles={{ root: { paddingLeft: 24, color: "#777" } }}>
-                        Updated by {item.createdBy.name} • {new Date(item.createdBy.date).toLocaleString('en-GB')}
+                        Updated by {group[0].createdBy.name} •{' '}
+                        {new Date(group[0].createdBy.date).toLocaleString('en-GB')}
                       </Text>
                     </Stack>
-
                   ))}
+
                 </Stack>
               ) : (
                 <Stack
