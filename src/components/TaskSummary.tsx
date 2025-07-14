@@ -84,20 +84,35 @@ const TaskSummary: React.FC = () => {
     enableReinitialize: true,
     initialValues: {
       type: task?.type || '',
-      businessId: task?.businessId || '',
+      businessId: task?.businessDetails.id || '',
       title: task?.title || '',
-      startDate: task?.startDate ? new Date(task.startDate) : new Date(),
-      dueDate: task?.dueDate ? new Date(task.dueDate) : new Date(),
+      startDate: task?.startdate ? new Date(task.startdate) : new Date(),
+      dueDate: task?.duedate ? new Date(task.duedate) : new Date(),
       deadline: task?.deadline ? new Date(task.deadline) : new Date(),
       priority: task?.priority || '',
       description: task?.description || '',
-      assignee: task?.assignee || '',
+      assignee: task?.assignee.id || '',
     },
     onSubmit: async (values) => {
-      const businessIdForTask = task.businessId
-      try {
-        const res = await await apiService.post(`/Task/update-task/?taskId=${taskId}&businessId=${businessIdForTask}`, values);
+      const businessIdForTask = task.businessDetails.id;
+      const assigneeUser = userOptions.find((u) => u.key === values.assignee);
 
+      const payload = {
+        ...values,
+        startdate: values.startDate,
+        duedate: values.dueDate,
+        deadline: values.deadline,
+        assignee: {
+          id: values.assignee,
+          name: assigneeUser?.text || '',
+        },
+      };
+
+      try {
+        const res = await apiService.post(
+          `/Task/update-task/?taskId=${taskId}&businessId=${businessIdForTask}`,
+          payload
+        );
         console.log('Task updated:', res);
         dismissPanel();
         fetchTask();
@@ -105,7 +120,8 @@ const TaskSummary: React.FC = () => {
       } catch (err) {
         console.error('Edit failed:', err);
       }
-    },
+    }
+
   });
 
   useEffect(() => {
@@ -155,7 +171,7 @@ const TaskSummary: React.FC = () => {
           <Text styles={{ root: labelStyle }}>Task name</Text>
           <Link styles={{ root: { ...valueStyle, color: '#0078d4', fontSize: 16 } }}>{task.title || 'N/A'}</Link>
         </Stack>
-        {role!=="Staff" && <IconButton onClick={openPanel} styles={{ root: { border: "none",padding:0, color:"black" } }} > <Edit size={20} />  </IconButton>}
+        {role !== "Staff" && <IconButton onClick={openPanel} styles={{ root: { border: "none", padding: 0, color: "black" } }} > <Edit size={20} />  </IconButton>}
       </Stack>
 
       <Stack tokens={{ childrenGap: 6 }}>
@@ -177,16 +193,16 @@ const TaskSummary: React.FC = () => {
 
       <Stack tokens={{ childrenGap: 8 }}>
         <Text styles={{ root: labelStyle }}>Action date</Text>
-        <Text styles={{ root: { ...valueStyle, color: 'green' } }}>{formatDate(task.createdAt)}</Text>
+        <Text styles={{ root: { ...valueStyle, color: 'green' } }}>{formatDate(task.createdBy?.date)}</Text>
 
         <Text styles={{ root: labelStyle }}>Start date</Text>
-        <Text styles={{ root: valueStyle }}>{formatDate(task.startDate)}</Text>
+        <Text styles={{ root: valueStyle }}>{formatDate(task.startdate)}</Text>
 
         <Text styles={{ root: labelStyle }}>Due date</Text>
-        <Text styles={{ root: valueStyle }}>{formatDate(task.dueDate)}</Text>
+        <Text styles={{ root: valueStyle }}>{formatDate(task.duedate)}</Text>
 
         <Text styles={{ root: labelStyle }}>Deadline</Text>
-        <Text styles={{ root: valueStyle }}>{formatDate(task.deadline)}</Text>
+        <Text styles={{ root: { ...valueStyle, color: 'red' } }}>{formatDate(task.deadline)}</Text>
 
         <Text styles={{ root: labelStyle }}>Description</Text>
         <Text styles={{ root: valueStyle }}>{task.description}</Text>

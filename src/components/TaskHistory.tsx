@@ -8,90 +8,48 @@ import {
   IconButton,
 } from '@fluentui/react';
 import { useParams } from 'react-router-dom';
-import { ChevronsDown, ChevronsUp, Edit, Plus, Trash2 } from 'lucide-react';
+import { ChevronsDown, ChevronsUp, Plus, Edit, Trash2 } from 'lucide-react';
 import apiService from '../api/apiService';
 import { useRefresh } from '../context/RefreshContext';
-import { differenceInSeconds, parseISO } from 'date-fns';
-import { ChevronUp, ChevronDown } from 'lucide-react';
 
-interface TaskChange {
-  field: string;
-  previous: string;
-  newval: string;
-  isChangeRegardingSubTask: boolean;
-  isChangeRegardingTask: boolean;
-  subTaskId?: string;
-}
-
-interface TaskHistoryData {
+interface HistoryEntry {
   id: string;
-  timestamp: string;
-  changes: TaskChange[];
-  taskdetails: {
-    title: string;
-    description: string;
-    type: string;
-  };
-  userdetails: {
+  description: string;
+  changeType: number; // 1 = add, 2 = edit, 3 = delete
+  targetedtask: {
+    id: string;
     name: string;
-    email: string;
-    role: string;
+  };
+  targetedbusiness: {
+    id: string;
+    name: string;
+  };
+  createdBy: {
+    id: string;
+    name: string;
+    email?: string;
+    address?: string;
+    date: string;
   };
 }
 
 const TaskHistory: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
-  const [history, setHistory] = useState<TaskHistoryData[]>([]);
+  const [history, setHistory] = useState<HistoryEntry[]>([]);
   const { refresh } = useRefresh();
   const [currentIndex, setCurrentIndex] = useState(0);
-  const pageSize = 6; // number of history items visible per page
-  const paginatedHistory = history.slice(currentIndex, currentIndex + pageSize);
+  const pageSize = 6;
+  const paginated = history.slice(currentIndex, currentIndex + pageSize);
 
-  const groupByTime = (histories: TaskHistoryData[]) => {
-    if (!histories || histories.length === 0) return [];
-
-    const grouped: TaskHistoryData[] = [];
-
-    let currentGroup: TaskHistoryData = {
-      ...histories[0],
-      changes: [...histories[0].changes],
-    };
-
-    for (let i = 1; i < histories.length; i++) {
-      const prevTime = parseISO(currentGroup.timestamp);
-      const currTime = parseISO(histories[i].timestamp);
-
-      const sameUser = histories[i].userdetails.name === currentGroup.userdetails.name;
-
-      if (
-        differenceInSeconds(currTime, prevTime) <= 1 &&
-        sameUser
-      ) {
-        currentGroup.changes = [...currentGroup.changes, ...histories[i].changes];
-      } else {
-        grouped.push(currentGroup);
-        currentGroup = {
-          ...histories[i],
-          changes: [...histories[i].changes],
-        };
-      }
-    }
-
-    grouped.push(currentGroup); 
-    return grouped;
-  };
-
-  const fetchTaskHistory = async (taskId: string) => {
+  const fetchTaskHistory = async (id: string) => {
     try {
-      const response = await apiService.get(`/TaskHistory/get-task-history/${taskId}`);
-      const originalHistory = response.taskHistories || [];
-      const groupedHistory = groupByTime(originalHistory);
-      setHistory(groupedHistory);
-    } catch (error) {
-      console.error('Failed to fetch task history:', error);
+      const response = await apiService.get(`/TaskHistory/get-task-history/${id}`);
+      const data: HistoryEntry[] = response.taskHistories || [];
+      setHistory(data);
+    } catch (err) {
+      console.error("Error loading history", err);
     }
   };
-
 
   useEffect(() => {
     if (taskId) {
@@ -99,24 +57,28 @@ const TaskHistory: React.FC = () => {
     }
   }, [taskId, refresh]);
 
+  const getIconByChangeType = (type: number) => {
+    switch (type) {
+      case 1: return <Plus size={20} color="#2E7D32" />;
+      case 2: return <Edit size={20} color="#1565C0" />;
+      case 3: return <Trash2 size={20} color="#C62828" />;
+      default: return <Edit size={20} />;
+    }
+  };
+
+
   return (
-    <div style={{ width: "90%", margin: '0 auto' }}>
+    <div style={{ width: "90%", margin: "0 auto" }}>
       <Stack tokens={{ childrenGap: 0 }}>
         <Pivot>
           <PivotItem headerText="History">
             <Stack tokens={{ childrenGap: 12 }}>
-              <Stack
-                horizontal
-                horizontalAlign="space-between"
-                verticalAlign="center"
-                styles={{ root: { width: '100%' } }}
-              >
+              <Stack horizontal horizontalAlign="space-between" verticalAlign="center">
                 <DefaultButton
                   text="Refresh"
                   onClick={() => taskId && fetchTaskHistory(taskId)}
                   styles={{ root: { marginTop: 15 } }}
                 />
-
                 <Stack horizontal tokens={{ childrenGap: 8 }} styles={{ root: { marginTop: 15 } }}>
                   <IconButton
                     disabled={currentIndex === 0}
@@ -124,7 +86,6 @@ const TaskHistory: React.FC = () => {
                   >
                     <ChevronsUp />
                   </IconButton>
-
                   <IconButton
                     disabled={currentIndex + pageSize >= history.length}
                     onClick={() =>
@@ -136,96 +97,36 @@ const TaskHistory: React.FC = () => {
                 </Stack>
               </Stack>
 
-
               {history.length > 0 ? (
-                <>
-                  <Stack tokens={{ childrenGap: 8 }}>
-                    {paginatedHistory.map((entry) => (
-                      <Stack
-                        key={entry.id}
-                        tokens={{ childrenGap: 8 }}
-                        styles={{
-                          root: {
-                            padding: '12px',
-                            border: '1px solid #eaeaea',
-                            borderRadius: 6,
-                            backgroundColor: '#f9f9f9',
-                          },
-                        }}
-                      >
-                        <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 8 }}>
-                          {(() => {
-                            const isTaskChange = entry.changes.every(c => !c.isChangeRegardingSubTask);
-                            const isSubTaskChange = entry.changes.some(c => c.isChangeRegardingSubTask);
-                            const isCreated = entry.changes.some(c => c.field.toLowerCase().includes('created'));
-                            const isDeleted = entry.changes.some(c => c.field.toLowerCase().includes('deleted'));
-
-                            let icon = <Edit size={20} color="#0078d4" />;
-                            let message = `${entry.userdetails.name} updated task at `;
-                            let color = "#0078d4";
-                            if (isTaskChange && isCreated) {
-                              icon = <Plus size={20} color="#2E7D32" />;
-                              message = `${entry.userdetails.name} created task at `;
-                              color = "#4CAF50";
-                            } else if (isSubTaskChange && isCreated) {
-                              icon = <Plus size={20} color="#00897B" />;
-                              message = `${entry.userdetails.name} added subtask at `;
-                              color = "#26A69A";
-                            } else if (isSubTaskChange && isDeleted) {
-                              icon = <Trash2 size={20} color="#C62828" />;
-                              message = `${entry.userdetails.name} deleted subtask at `;
-                              color = "#EF5350";
-                            } else if (isSubTaskChange) {
-                              icon = <Edit size={20} color="#EF6C00" />;
-                              message = `${entry.userdetails.name} updated subtask at `;
-                              color = "#FFB74D";
-                            } else {
-                              icon = <Edit size={20} color="#1565C0" />;
-                              message = `${entry.userdetails.name} updated task at `;
-                              color = "#42A5F5";
-                            }
-
-                            return (
-                              <>
-                                {icon}
-                                <Text variant="medium" styles={{ root: { color } }}>
-                                  {message}
-                                  {new Date(entry.timestamp).toLocaleString('en-GB')}
-                                </Text>
-                              </>
-                            );
-                          })()}
-                        </Stack>
-
-                        {(() => {
-                          const isTaskChange = entry.changes.every(c => !c.isChangeRegardingSubTask);
-                          const isCreated = entry.changes.some(c => c.field.toLowerCase().includes('created'));
-
-                          if (isTaskChange && isCreated)
-                            return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Task created with details:</Text>;
-                          if (isTaskChange)
-                            return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Task updated with changes:</Text>;
-                          if (!isTaskChange && isCreated)
-                            return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Subtask created with details:</Text>;
-                          if (!isTaskChange && entry.changes.some(c => c.field.toLowerCase().includes('deleted')))
-                            return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Subtask was deleted:</Text>;
-                          return <Text variant="medium" styles={{ root: { paddingLeft: 28 } }}>Subtask updated with changes:</Text>;
-                        })()}
-
-                        <Stack tokens={{ childrenGap: 4 }} styles={{ root: { paddingLeft: 28 } }}>
-                          {entry.changes.map((change, index) => (
-                            <Text key={index} variant="medium">
-                              <b>{change.field.charAt(0).toUpperCase() + change.field.slice(1)}:</b>{' '}
-                              {change.previous} → {change.newval}
-                            </Text>
-                          ))}
-                        </Stack>
+                <Stack tokens={{ childrenGap: 8 }}>
+                  {paginated.map((item) => (
+                    <Stack
+                      key={item.id}
+                      tokens={{ childrenGap: 4 }}
+                      styles={{
+                        root: {
+                          padding: '12px',
+                          border: '1px solid #eaeaea',
+                          borderRadius: 6,
+                          backgroundColor: '#f9f9f9',
+                        },
+                      }}
+                    >
+                      <Stack horizontal verticalAlign="start" tokens={{ childrenGap: 8 }}>
+                        {getIconByChangeType(item.changeType)}
+                        <span
+                          style={{ fontSize: 14, color: "#333", lineHeight: 1.4 }}
+                          dangerouslySetInnerHTML={{ __html: item.description }}
+                        />
                       </Stack>
-                    ))}
-                  </Stack>
 
+                      <Text variant="smallPlus" styles={{ root: { paddingLeft: 24, color: "#777" } }}>
+                        Updated by {item.createdBy.name} • {new Date(item.createdBy.date).toLocaleString('en-GB')}
+                      </Text>
+                    </Stack>
 
-                </>
+                  ))}
+                </Stack>
               ) : (
                 <Stack
                   horizontalAlign="center"

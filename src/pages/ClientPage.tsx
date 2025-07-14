@@ -17,9 +17,9 @@ const ClientPage: React.FC = () => {
   const navigate = useNavigate()
   const columns = [
     {
-      key: 'bId',
+      key: 'bid',
       name: 'Client ID',
-      fieldName: 'bId',
+      fieldName: 'bid',
       maxWidth: 100,
       isResizable: true,
       onRender: (item: any) => (
@@ -33,7 +33,7 @@ const ClientPage: React.FC = () => {
             display: 'inline-block',
           }}
         >
-          {item.bId}
+          {item.bid}
         </span>
       ),
     },
@@ -140,17 +140,17 @@ const ClientPage: React.FC = () => {
       console.log('Formatted Client Data:', response);
       const formatted = response.businesses?.map((b: any) => ({
         id: b.id,
-        bId: b.bId,
+        bid: b.bid,
         type: b.type,
         name: b.name,
-        building: b.building,
-        city: b.city,
-        state: b.state,
-        country: b.country,
-        postcode: b.postcode,
-        username: b.userDetails?.username || 'N/A',
-        email: b.userDetails?.email || 'N/A',
-        createdAt: b.createdAt,
+        building: b.address.building,
+        city: b.address.city,
+        state: b.address.state,
+        country: b.address.country,
+        postcode: b.address.postcode,
+        username: b.createdby?.name || 'N/A',
+        email: b.createdby?.email || 'N/A',
+        createdAt: b.createdby.date,
       }));
 
       setClientData(formatted);

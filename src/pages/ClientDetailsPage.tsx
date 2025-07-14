@@ -150,26 +150,26 @@ const ClientDetailsPage: React.FC = () => {
                                     </Stack>
                                     <Stack grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Building</Text>
-                                        <Text>{businessData?.building}</Text>
+                                        <Text>{businessData?.address.building}</Text>
                                     </Stack>
                                     <Stack grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">City</Text>
-                                        <Text>{businessData?.city}</Text>
+                                        <Text>{businessData?.address.city}</Text>
                                     </Stack>
                                 </Stack>
 
-                                <Stack horizontal wrap tokens={{ childrenGap: 16 }}>
-                                    <Stack grow styles={{ root: { minWidth: 200 } }} tokens={{ childrenGap: 4 }}>
+                                <Stack horizontal horizontalAlign='space-between' wrap tokens={{ childrenGap: 16 }}>
+                                    <Stack grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">State</Text>
-                                        <Text>{businessData?.state}</Text>
+                                        <Text>{businessData?.address.state}</Text>
                                     </Stack>
-                                    <Stack grow styles={{ root: { minWidth: 200 } }} tokens={{ childrenGap: 4 }}>
+                                    <Stack grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Country</Text>
-                                        <Text>{businessData?.country}</Text>
+                                        <Text>{businessData?.address.country}</Text>
                                     </Stack>
-                                    <Stack grow styles={{ root: { minWidth: 200 } }} tokens={{ childrenGap: 4 }}>
+                                    <Stack grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Postcode</Text>
-                                        <Text>{businessData?.postcode}</Text>
+                                        <Text>{businessData?.address.postcode}</Text>
                                     </Stack>
                                 </Stack>
                             </Stack>
@@ -195,44 +195,44 @@ const ClientDetailsPage: React.FC = () => {
                                     <Stack grow={1} tokens={{ childrenGap: 12 }}>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Name</Text>
-                                            <Text>{businessData?.userDetails?.name}</Text>
+                                            <Text>{businessData?.createdby?.name}</Text>
                                         </Stack>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Building</Text>
-                                            <Text>{businessData?.userDetails?.building}</Text>
+                                            <Text>{businessData?.createdby?.address.building}</Text>
                                         </Stack>
                                     </Stack>
 
                                     <Stack grow={1} tokens={{ childrenGap: 12 }}>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">City</Text>
-                                            <Text>{businessData?.userDetails?.city}</Text>
+                                            <Text>{businessData?.createdby?.address.city}</Text>
                                         </Stack>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">State</Text>
-                                            <Text>{businessData?.userDetails?.state}</Text>
+                                            <Text>{businessData?.createdby?.address.state}</Text>
                                         </Stack>
                                     </Stack>
 
                                     <Stack grow={1} tokens={{ childrenGap: 12 }}>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Country</Text>
-                                            <Text>{businessData?.userDetails?.country}</Text>
+                                            <Text>{businessData?.createdBy?.address.country}</Text>
                                         </Stack>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Postcode</Text>
-                                            <Text>{businessData?.userDetails?.postcode}</Text>
+                                            <Text>{businessData?.createdby?.address.postcode}</Text>
                                         </Stack>
                                     </Stack>
 
                                     <Stack grow={1} tokens={{ childrenGap: 12 }}>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Email</Text>
-                                            <Text>{businessData?.userDetails?.email}</Text>
+                                            <Text>{businessData?.createdby?.email}</Text>
                                         </Stack>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Username</Text>
-                                            <Text>{businessData?.userDetails?.username}</Text>
+                                            <Text>{businessData?.createdby?.name}</Text>
                                         </Stack>
                                     </Stack>
                                 </Stack>

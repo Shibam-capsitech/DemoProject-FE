@@ -114,19 +114,33 @@ function AddTaskPanel() {
     onSubmit: async values => {
       setSubmitting(true);
       const selectedBusiness = businessOptions.find(opt => opt.key === values.businessId);
-      const businessName = selectedBusiness?.text || '';
+      const selectedAssignee = assigneeOptions.find(opt => opt.key === values.assignee);
+      const businessDetails = {
+        id: values.businessId,
+        name: selectedBusiness?.text || '',
+      };
+      const assignee = {
+        id: selectedAssignee?.key || '',
+        name: selectedAssignee?.text || '',
+      };
+
       try {
         const formData = new FormData();
         formData.append('type', values.type);
-        formData.append('businessName', businessName);
         formData.append('title', values.title);
-        formData.append('startDate', values.startDate.toISOString());
-        formData.append('dueDate', values.dueDate.toISOString());
+        formData.append('startdate', values.startDate.toISOString());
+        formData.append('duedate', values.dueDate.toISOString());
         formData.append('deadline', values.deadline.toISOString());
         formData.append('priority', values.priority);
         formData.append('description', values.description);
-        formData.append('assignee', values.assignee || '');
-        formData.append('businessId', values.businessId);
+
+        formData.append('businessDetails.id', businessDetails.id);
+        formData.append('businessDetails.name', businessDetails.name);
+
+        formData.append('assignee.id', assignee.id);
+        formData.append('assignee.name', assignee.name);
+
+
         if (values.file) {
           formData.append('file', values.file);
         }
@@ -136,17 +150,19 @@ function AddTaskPanel() {
             'Content-Type': 'multipart/form-data',
           },
         });
+
         toast.success('Task created successfully!');
-        toggleRefresh()
+        toggleRefresh();
         formik.resetForm();
         dismissPanel();
       } catch (err) {
         console.error('Task creation failed:', err);
+        toast.error('Task creation failed');
       } finally {
-        setSubmitting(false)
+        setSubmitting(false);
       }
-    }
 
+    }
   });
 
   const onRenderFooterContent = (

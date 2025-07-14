@@ -49,7 +49,21 @@ const SignupPage: React.FC = () => {
 
   const handleSubmit = async (values: typeof initialValues) => {
     try {
-      const res = await apiService.post("/User/signup", values);
+      const payload = {
+        username: values.username,
+        email: values.email,
+        password: values.password,
+        name: values.name,
+        role: values.role,
+        address: {
+          city: values.city,
+          state: values.state,
+          country: values.country,
+          postcode: values.postcode,
+        },
+      };
+
+      const res = await apiService.post("/User/signup", payload);
       toast.success("Signup successful! Redirecting to login...");
       navigate("/login");
     } catch (error) {
@@ -111,7 +125,7 @@ const SignupPage: React.FC = () => {
                     onChange={(_, val) => handleChange("username")(val ?? "")}
                     onBlur={handleBlur}
                     errorMessage={touched.username ? errors.username : undefined}
-                   styles={{ root: { width: "100%" }, fieldGroup: { width: "100%", borderRadius: 6 } }}
+                    styles={{ root: { width: "100%" }, fieldGroup: { width: "100%", borderRadius: 6 } }}
                   />
                   <TextField
                     label="Full Name"
@@ -173,7 +187,7 @@ const SignupPage: React.FC = () => {
                     onChange={(_, val) => handleChange("state")(val ?? "")}
                     onBlur={handleBlur}
                     errorMessage={touched.state ? errors.state : undefined}
-                  styles={{ root: { width: "100%" }, fieldGroup: { width: "100%", borderRadius: 6 } }}
+                    styles={{ root: { width: "100%" }, fieldGroup: { width: "100%", borderRadius: 6 } }}
                   />
                 </Stack>
 

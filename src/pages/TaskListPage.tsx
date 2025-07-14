@@ -34,10 +34,10 @@ const ClientPage: React.FC = () => {
     try {
       const res = await apiService.get('/Task/get-all-task');
       const data = res.tasks.map((t: any) => ({
-        id: t._id,
+        id: t.id,
         tid: t.tid,
         type: t.type,
-        businessName: t.businessDetails?.name || '',
+        businessName: t.businessdetails?.name || '',
         title: t.title,
         startDate: t.startdate,
         dueDate: t.duedate,
@@ -47,6 +47,7 @@ const ClientPage: React.FC = () => {
         assignee: t.assignee,
         businessId: t.businessId,
         file: t.attachment,
+        createdAt: t.createdby?.date
       }));
       setTasks(data);
     } catch (error) {
@@ -155,18 +156,19 @@ const ClientPage: React.FC = () => {
        maxWidth: 400,
       onRender: (item: any) => <span style={cellStyle}>{item.description}</span>,
     },
-    {
-      key: 'businessId',
-      name: 'Business ID',
-      fieldName: 'businessId',
-      onRender: (item: any) => <span style={cellStyle}>{item.businessId}</span>,
-    },
         {
       key: 'assignee',
       name: 'Assignee',
       fieldName: 'assignee',
       maxWidth: 100,
-      onRender: (item: any) => <span style={cellStyle}>{item.assignee}</span>,
+      onRender: (item: any) => <span style={cellStyle}>{item.assignee?.name}</span>,
+    },
+            {
+      key: 'createdAt',
+      name: 'Created At',
+      fieldName: 'createdAt',
+      maxWidth: 100,
+      onRender: (item: any) => <span style={cellStyle}>{item.createdAt}</span>,
     },
     {
       key: 'file',

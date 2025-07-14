@@ -36,7 +36,7 @@ const TaskSteps = () => {
   const fetchTask = async () => {
     try {
       const res = await apiService.get(`/Task/get-task-by-id/${taskId}`);
-      setSubTask(res.task.subTask || []);
+      setSubTask(res.task.subtask || []);
     } catch (error) {
       console.error('Error fetching task:', error);
     }
