@@ -73,11 +73,11 @@ function EditBusinessPanel({
                 formik.setValues({
                     type: response.business.type,
                     name: response.business.name,
-                    building: response.business.building,
-                    city: response.business.city,
-                    postcode: response.business.postcode,
-                    country: response.business.country,
-                    state: response.business.state,
+                    building: response.business.address?.building,
+                    city: response.business.address?.city,
+                    postcode: response.business.address?.postcode,
+                    country: response.business.address?.country,
+                    state: response.business.address?.state,
                 });
             } else {
                 toast.error('Business not found');

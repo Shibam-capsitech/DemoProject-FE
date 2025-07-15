@@ -15,7 +15,7 @@ import { useRefresh } from '../context/RefreshContext';
 interface HistoryEntry {
   id: string;
   description: string;
-  changeType: number; // 1 = add, 2 = edit, 3 = delete
+  changeType: number;
   targetedtask: {
     id: string;
     name: string;
@@ -127,7 +127,7 @@ const TaskHistory: React.FC = () => {
                   </IconButton>
                 </Stack>
               </Stack>
-
+              
               {history.length > 0 ? (
                 <Stack tokens={{ childrenGap: 8 }}>
                   {paginated.map((group, index) => (

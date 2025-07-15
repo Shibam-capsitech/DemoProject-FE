@@ -7,12 +7,10 @@ import { UserProvider } from './context/UserContext.tsx'
 import { RefreshProvider } from './context/RefreshContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
-  <StrictMode>
     <UserProvider>
       <RefreshProvider>
     <App />
     <ToastContainer autoClose={1000}/>
     </RefreshProvider>
     </UserProvider>
-  </StrictMode>,
 )

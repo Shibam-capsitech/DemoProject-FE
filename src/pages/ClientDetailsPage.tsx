@@ -42,8 +42,8 @@ const ClientDetailsPage: React.FC = () => {
             minWidth: 120,
             onRender: (item) => {
                 const allCompleted =
-                    item?.subTask?.length > 0 &&
-                    item.subTask.every((sub: any) => sub.status === 'Completed');
+                    item?.subtask?.length > 0 &&
+                    item.subtask.every((sub: any) => sub.status === 'Completed');
 
                 return (
                     <Text
@@ -195,22 +195,22 @@ const ClientDetailsPage: React.FC = () => {
                                     <Stack grow={1} tokens={{ childrenGap: 12 }}>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Name</Text>
-                                            <Text>{businessData?.createdby?.name}</Text>
+                                            <Text>{businessData?.createdBy?.name}</Text>
                                         </Stack>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Building</Text>
-                                            <Text>{businessData?.createdby?.address.building}</Text>
+                                            <Text>{businessData?.createdBy?.address.building}</Text>
                                         </Stack>
                                     </Stack>
 
                                     <Stack grow={1} tokens={{ childrenGap: 12 }}>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">City</Text>
-                                            <Text>{businessData?.createdby?.address.city}</Text>
+                                            <Text>{businessData?.createdBy?.address.city}</Text>
                                         </Stack>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">State</Text>
-                                            <Text>{businessData?.createdby?.address.state}</Text>
+                                            <Text>{businessData?.createdBy?.address.state}</Text>
                                         </Stack>
                                     </Stack>
 
@@ -221,18 +221,18 @@ const ClientDetailsPage: React.FC = () => {
                                         </Stack>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Postcode</Text>
-                                            <Text>{businessData?.createdby?.address.postcode}</Text>
+                                            <Text>{businessData?.createdBy?.address.postcode}</Text>
                                         </Stack>
                                     </Stack>
 
                                     <Stack grow={1} tokens={{ childrenGap: 12 }}>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Email</Text>
-                                            <Text>{businessData?.createdby?.email}</Text>
+                                            <Text>{businessData?.createdBy?.email}</Text>
                                         </Stack>
                                         <Stack tokens={{ childrenGap: 4 }}>
                                             <Text variant="mediumPlus">Username</Text>
-                                            <Text>{businessData?.createdby?.name}</Text>
+                                            <Text>{businessData?.createdBy?.name}</Text>
                                         </Stack>
                                     </Stack>
                                 </Stack>

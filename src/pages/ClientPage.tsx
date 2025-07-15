@@ -33,7 +33,7 @@ const ClientPage: React.FC = () => {
             display: 'inline-block',
           }}
         >
-          {item.bid}
+          {item.bId}
         </span>
       ),
     },
@@ -59,42 +59,42 @@ const ClientPage: React.FC = () => {
       fieldName: 'building',
       maxWidth: 200,
       isResizable: true,
-      onRender: (item: any) => <span style={{ color: '#444' }}>{item.building}</span>,
+      onRender: (item: any) => <span style={{ color: '#444' }}>{item.address.building}</span>,
     },
     {
       key: 'city',
       name: 'City',
       fieldName: 'city',
       maxWidth: 200,
-      onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.city}</span>,
+      onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.address.city}</span>,
     },
     {
       key: 'state',
       name: 'State',
       fieldName: 'state',
       minWidth: 200,
-      onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.state}</span>,
+      onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.address.state}</span>,
     },
     {
       key: 'country',
       name: 'Country',
       fieldName: 'country',
       minWidth: 200,
-      onRender: (item: any) => <span>{item.country}</span>,
+      onRender: (item: any) => <span>{item.address.country}</span>,
     },
     {
       key: 'postcode',
       name: 'Postcode',
       fieldName: 'postcode',
       minWidth: 100,
-      onRender: (item: any) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{item.postcode}</span>,
+      onRender: (item: any) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{item.address.postcode}</span>,
     },
     {
       key: 'username',
       name: 'Username',
       fieldName: 'username',
       minWidth: 200,
-      onRender: (item: any) => <span style={{ fontWeight: 500 }}>{item.username}</span>,
+      onRender: (item: any) => <span style={{ fontWeight: 500 }}>{item.createdBy?.name}</span>,
     },
     {
       key: 'email',
@@ -102,7 +102,7 @@ const ClientPage: React.FC = () => {
       fieldName: 'email',
       minWidth: 180,
       isResizable: true,
-      onRender: (item: any) => <span style={{ fontStyle: 'italic', color: '#444' }}>{item.email}</span>,
+      onRender: (item: any) => <span style={{ fontStyle: 'italic', color: '#444' }}>{item.createdBy?.email}</span>,
     },
     {
       key: 'createdAt',
@@ -111,19 +111,19 @@ const ClientPage: React.FC = () => {
       minWidth: 140,
       onRender: (item: any) => (
         <span style={{ color: '#888' }}>
-          {new Date(item.createdAt).toLocaleDateString('en-GB')}
+          {new Date(item.createdBy?.date).toLocaleDateString('en-GB')}
         </span>
       ),
     },
   ];
 
   const criteria: IDropdownOption[] = [
-    { key: 'type', text: 'Business Type' },
+    { key: 'Type', text: 'Business Type' },
     // { key: 'state', text: 'State' },
   ];
 
   const valueMap: Record<string, IDropdownOption[]> = {
-    type: [
+    Type: [
       { key: 'Individual', text: 'Individual' },
       { key: 'Partnership', text: 'Partnership' },
       { key: 'Limited Partnership', text: 'Limited Partnership' },
@@ -140,17 +140,19 @@ const ClientPage: React.FC = () => {
       console.log('Formatted Client Data:', response);
       const formatted = response.businesses?.map((b: any) => ({
         id: b.id,
-        bid: b.bid,
+        bId: b.bId,
         type: b.type,
         name: b.name,
-        building: b.address.building,
-        city: b.address.city,
-        state: b.address.state,
-        country: b.address.country,
-        postcode: b.address.postcode,
-        username: b.createdby?.name || 'N/A',
-        email: b.createdby?.email || 'N/A',
-        createdAt: b.createdby.date,
+        // building: b.address.building,
+        // city: b.address.city,
+        // state: b.address.state,
+        // country: b.address.country,
+        // postcode: b.address.postcode,
+        // username: b.createdby?.name || 'N/A',
+        // email: b.createdby?.email || 'N/A',
+        // createdAt: b.createdby.date,
+        address: b.address,
+        createdBy : b.createdBy
       }));
 
       setClientData(formatted);

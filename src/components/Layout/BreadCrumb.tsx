@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { Breadcrumb, type IBreadcrumbItem, type IDividerAsProps } from "@fluentui/react/lib/Breadcrumb";
 import { ChevronRight } from "lucide-react";
+import apiService from "../../api/apiService";
+
 
 const routeNameMap: { [key: string]: string } = {
   admin: "Home",
@@ -11,13 +13,10 @@ const routeNameMap: { [key: string]: string } = {
   signup: "Sign Up",
 };
 
-function CustomDivider(dividerProps: IDividerAsProps): JSX.Element {
+function CustomDivider(_: IDividerAsProps): JSX.Element {
   return (
-    <span
-      aria-hidden="true"
-      style={{ cursor: "default", padding: "0 4px", fontSize: "18px" }}
-    >
-      <ChevronRight size="18px"/>
+    <span aria-hidden="true" style={{ cursor: "default", padding: "0 4px", fontSize: "18px" }}>
+      <ChevronRight size="18px" />
     </span>
   );
 }
@@ -25,16 +24,43 @@ function CustomDivider(dividerProps: IDividerAsProps): JSX.Element {
 const Breadcrumbs: React.FC = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const [businessName, setBusinessName] = useState<string | null>(null);
 
   const pathnames = location.pathname.split("/").filter(Boolean);
 
+  useEffect(() => {
+    const lastSegment = pathnames[pathnames.length - 1];
+    const secondLast = pathnames[pathnames.length - 2];
+
+    const isBusinessRoute = secondLast === "clients" || secondLast === "business";
+    const isTaskRoute = secondLast === "tasks" 
+    const isId = /^[a-f\d]{24}$/i.test(lastSegment); 
+
+    if (isBusinessRoute && isId) {
+      apiService.get(`/business/get-business-by-id/${lastSegment}`).then((res) => {
+        setBusinessName(res.business.name || "Business");
+      }).catch(() => setBusinessName("Business"));
+    } else if(isTaskRoute && isId) {
+     apiService.get(`/task/get-task-by-id/${lastSegment}`).then((res) => {
+        setBusinessName(res.task.title || "Business");
+      }).catch(() => setBusinessName("Business"));
+    }
+  }, [location.pathname]);
+
   const breadcrumbItems: IBreadcrumbItem[] = pathnames.map((segment, index) => {
     const path = "/" + pathnames.slice(0, index + 1).join("/");
+    const isLast = index === pathnames.length - 1;
+
+    let text = routeNameMap[segment] || segment;
+    if (isLast && businessName) {
+      text = businessName;
+    }
+
     return {
-      text: routeNameMap[segment] || segment,
+      text,
       key: path,
       onClick: () => navigate(path),
-      isCurrentItem: index === pathnames.length - 1,
+      isCurrentItem: isLast,
     };
   });
 

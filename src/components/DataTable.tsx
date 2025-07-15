@@ -13,7 +13,7 @@ import {
   mergeStyleSets,
   FontWeights,
 } from "@fluentui/react";
-import { ChevronLeft, ChevronRight, ListFilterPlus, Search } from "lucide-react";
+import { ChevronLeft, ChevronRight, Inbox, ListFilterPlus, Search } from "lucide-react";
 import {
   FocusTrapCallout,
   FocusZone,
@@ -65,11 +65,6 @@ const CustomTable: React.FC<CustomTableProps> = ({
   const [selectedValue, setSelectedValue] = useState<string>();
   const [filteredTableData, setFilteredTableData] = useState<any[] | null>(null);
 
-  // Map criteria key to dropdown options for value selection
-  const valueMap: Record<string, IDropdownOption[]> = useMemo(() => {
-    return filterValue || {};
-  }, [filterValue]);
-
   const location = useLocation();
   const isClientActive = location.pathname.includes("client");
   const isTaskActive = location.pathname.includes("task");
@@ -94,71 +89,53 @@ const CustomTable: React.FC<CustomTableProps> = ({
     },
   });
 
-  const handleSearch = (_: any, newValue?: string) => {
-    setFilterText(newValue || "");
-    setCurrentPage(1);
-    setFilteredTableData(null);
-  };
-
   const handleItemInvoked = (item: any) => {
     onRowClick?.(item);
   };
 
-  const fetchFilteredBusinesses = async () => {
+  const handleSearch = async (_: any, newValue?: string) => {
+    const keyword = newValue || "";
+    setFilterText(keyword);
+    setCurrentPage(1);
+
     try {
-      const res = await apiService.post("/Business/filter", {
-        criteria: selectedCriteria,
-        value: selectedValue,
-      });
-      setFilteredTableData(res.filteredData || []);
-      setCurrentPage(1);
+      const queryParams = new URLSearchParams();
+
+      if (selectedCriteria && selectedValue) {
+        queryParams.append("criteria", selectedCriteria);
+        queryParams.append("value", selectedValue);
+      }
+
+      if (keyword) {
+        queryParams.append("search", keyword);
+      }
+
+      const endpoint = isClientActive
+        ? `/Business/get-all-businesses?${queryParams.toString()}`
+        : `/Task/get-all-task?${queryParams.toString()}`;
+
+      const res = await apiService.get(endpoint);
+      setFilteredTableData(res.filteredData || res.businesses || res.tasks || []);
     } catch (error) {
-      console.error("Error fetching filtered items:", error);
-    }
-  };
-  const fetchFilteredTasks = async () => {
-    try {
-      const res = await apiService.post("/Task/filter", {
-        criteria: selectedCriteria,
-        value: selectedValue,
-      });
-      setFilteredTableData(res.filteredData || []);
-      setCurrentPage(1);
-    } catch (error) {
-      console.error("Error fetching filtered items:", error);
+      console.error("Search failed:", error);
     }
   };
 
   const handleApplyFilter = () => {
-    if (isClientActive) {
-      fetchFilteredBusinesses();
-    } else if (isTaskActive) {
-      fetchFilteredTasks()
-    } else {
-      console.warn("No matching route for filtering.");
-    }
+    handleSearch(null, filterText);
+    toggleIsCalloutVisible();
   };
 
-  const filteredItems = useMemo(() => {
-    const baseItems = filteredTableData ?? items;
-    if (!filterText) return baseItems;
-
-    const lower = filterText.toLowerCase();
-    return baseItems.filter(item =>
-      columns.some(col => {
-        const val = item[col.fieldName];
-        return typeof val === "string" && val.toLowerCase().includes(lower);
-      })
-    );
-  }, [filterText, items, filteredTableData, columns]);
-
-  const totalPages = pageSize ? Math.ceil(filteredItems.length / pageSize) : 1;
-
   const visibleItems = useMemo(() => {
-    if (!pageSize) return filteredItems;
+    const baseItems = filteredTableData ?? items;
+    if (!pageSize) return baseItems;
     const start = (currentPage - 1) * pageSize;
-    return filteredItems.slice(start, start + pageSize);
-  }, [filteredItems, currentPage, pageSize]);
+    return baseItems.slice(start, start + pageSize);
+  }, [filteredTableData, items, currentPage, pageSize]);
+
+  const totalPages = pageSize
+    ? Math.ceil((filteredTableData ?? items).length / pageSize)
+    : 1;
 
   return (
     <Stack styles={{ root: { width: "100%" } }}>
@@ -226,28 +203,22 @@ const CustomTable: React.FC<CustomTableProps> = ({
                 <Dropdown
                   placeholder="Select value"
                   label="Value"
-                  options={filterValue[selectedCriteria]}
+                  options={filterValue?.[selectedCriteria] ?? []}
                   styles={dropdownStyles}
                   selectedKey={selectedValue}
                   onChange={(_, option) => setSelectedValue(option?.key as string)}
                 />
               )}
 
-
               <FocusZone handleTabKey={FocusZoneTabbableElements.all} isCircularNavigation>
                 <Stack className={styles.buttons} gap={8} horizontal>
                   <PrimaryButton
-                    onClick={() => {
-                      toggleIsCalloutVisible();
-                      handleApplyFilter();
-                    }}
+                    onClick={handleApplyFilter}
                     disabled={!selectedCriteria || !selectedValue}
                   >
                     Apply
                   </PrimaryButton>
-
                   <DefaultButton onClick={toggleIsCalloutVisible}>Cancel</DefaultButton>
-
                   <DefaultButton
                     onClick={() => {
                       setFilteredTableData(null);
@@ -255,7 +226,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                       setSelectedValue(undefined);
                       toggleIsCalloutVisible();
                     }}
-                    styles={{root:{whiteSpace:"noWrap"}}}
+                    styles={{ root: { whiteSpace: "noWrap" } }}
                   >
                     Clear Filter
                   </DefaultButton>
@@ -266,55 +237,90 @@ const CustomTable: React.FC<CustomTableProps> = ({
         </Stack.Item>
       </Stack>
 
-      <DetailsList
-        items={visibleItems}
-        columns={columns as IColumn[]}
-        setKey="set"
-        layoutMode={DetailsListLayoutMode.fixedColumns}
-        selectionMode={selectionMode}
-        onItemInvoked={handleItemInvoked}
-        styles={{
-          root: { overflowX: "auto", width: "100%",  },
-          headerWrapper: {
-            selectors: {
-              ".ms-DetailsHeader-cell": {
-                background: "#f4f4f4 !important",
-                color: "#005a9e",
-                fontSize: "18px",
-                fontWeight: 600,
+      {visibleItems.length > 0 ? (
+        <>
+          <DetailsList
+            items={visibleItems}
+            columns={columns as IColumn[]}
+            setKey="set"
+            layoutMode={DetailsListLayoutMode.fixedColumns}
+            selectionMode={selectionMode}
+            onItemInvoked={handleItemInvoked}
+            styles={{
+              root: { overflowX: "auto", width: "100%" },
+              headerWrapper: {
+                selectors: {
+                  ".ms-DetailsHeader-cell": {
+                    background: "#f4f4f4 !important",
+                    color: "#005a9e",
+                    fontSize: "18px",
+                    fontWeight: 600,
+                  },
+                },
               },
-            },
-          },
-          contentWrapper: {
-            selectors: {
-              ".ms-DetailsRow-cell": {
-                fontSize: "15px !important",
-                padding: "8px 12px",
+              contentWrapper: {
+                selectors: {
+                  ".ms-DetailsRow-cell": {
+                    fontSize: "15px !important",
+                    padding: "8px 12px",
+                  },
+                },
               },
-            },
-          },
-        }}
-      />
+            }}
+          />
 
-      {pageSize && totalPages > 1 && (
-        <Stack horizontal horizontalAlign="center" verticalAlign="center" tokens={{ childrenGap: 8 }} styles={{ root: { paddingTop: 12 } }}>
-          <ChevronLeft
-            size={20}
-            style={{
-              cursor: currentPage <= 1 ? "not-allowed" : "pointer",
-              opacity: currentPage <= 1 ? 0.3 : 1,
-            }}
-            onClick={() => currentPage > 1 && setCurrentPage(p => p - 1)}
-          />
-          <Text>Page {currentPage} of {totalPages}</Text>
-          <ChevronRight
-            size={20}
-            style={{
-              cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
-              opacity: currentPage >= totalPages ? 0.3 : 1,
-            }}
-            onClick={() => currentPage < totalPages && setCurrentPage(p => p + 1)}
-          />
+          {pageSize && totalPages > 1 && (
+            <Stack
+              horizontal
+              horizontalAlign="center"
+              verticalAlign="center"
+              tokens={{ childrenGap: 8 }}
+              styles={{ root: { paddingTop: 12 } }}
+            >
+              <ChevronLeft
+                size={20}
+                style={{
+                  cursor: currentPage <= 1 ? "not-allowed" : "pointer",
+                  opacity: currentPage <= 1 ? 0.3 : 1,
+                }}
+                onClick={() => currentPage > 1 && setCurrentPage((p) => p - 1)}
+              />
+              <Text>Page {currentPage} of {totalPages}</Text>
+              <ChevronRight
+                size={20}
+                style={{
+                  cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
+                  opacity: currentPage >= totalPages ? 0.3 : 1,
+                }}
+                onClick={() => currentPage < totalPages && setCurrentPage((p) => p + 1)}
+              />
+            </Stack>
+          )}
+        </>
+      ) : (
+        <Stack
+          verticalAlign="center"
+          horizontalAlign="center"
+          tokens={{ childrenGap: 12 }}
+          styles={{
+            root: {
+              padding: 40,
+              border: "1px dashed #d0d7de",
+              borderRadius: 8,
+              marginTop: 24,
+              background: "#fdfdfd",
+              textAlign: "center",
+              boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
+            },
+          }}
+        >
+          <Inbox size={48} color="#888" strokeWidth={1.2} />
+          <Text variant="xLarge" styles={{ root: { color: "#555", fontWeight: 500 } }}>
+            No data to show
+          </Text>
+          <Text variant="medium" styles={{ root: { color: "#777", maxWidth: 300 } }}>
+            We couldn't find any records matching your current filters or search.
+          </Text>
         </Stack>
       )}
     </Stack>

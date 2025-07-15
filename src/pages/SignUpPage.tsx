@@ -16,7 +16,7 @@ import apiService from "../api/apiService";
 const roles: IDropdownOption[] = [
   { key: "Admin", text: "Admin" },
   { key: "Manager", text: "Manager" },
-  { key: "Technician", text: "Technician" },
+  { key: "Staff", text: "Staff" },
 ];
 
 // ✅ Validation Schema

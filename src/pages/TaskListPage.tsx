@@ -37,17 +37,16 @@ const ClientPage: React.FC = () => {
         id: t.id,
         tid: t.tid,
         type: t.type,
-        businessName: t.businessdetails?.name || '',
+        businessDetails: t.businessDetails,
         title: t.title,
         startDate: t.startdate,
         dueDate: t.duedate,
         deadline: t.deadline,
-        priority: ['High', 'Medium', 'Low'][t.priority] ?? t.priority,
+        priority: t.priority,
         description: t.description,
         assignee: t.assignee,
-        businessId: t.businessId,
         file: t.attachment,
-        createdAt: t.createdby?.date
+        createdBy: t.createdBy
       }));
       setTasks(data);
     } catch (error) {
@@ -107,7 +106,7 @@ const ClientPage: React.FC = () => {
       name: 'Business Name',
       fieldName: 'businessName',
       maxWidth: 200,
-      onRender: (item: any) => <span style={cellStyle}>{item.businessName}</span>,
+      onRender: (item: any) => <span style={cellStyle}>{item.businessDetails?.name}</span>,
     },
     {
       key: 'startDate',
@@ -147,28 +146,33 @@ const ClientPage: React.FC = () => {
       name: 'Priority',
       fieldName: 'priority',
       maxWidth: 100,
-      onRender: (item: any) => <span style={cellStyle}>{item.priority}</span>,
+      onRender: (item: any) => <span style={cellStyle}>{['High', 'Medium', 'Low'][item.priority] ?? item.priority}</span>,
     },
     {
       key: 'description',
       name: 'Description',
       fieldName: 'description',
-       maxWidth: 400,
+      maxWidth: 300,
       onRender: (item: any) => <span style={cellStyle}>{item.description}</span>,
     },
-        {
+    {
       key: 'assignee',
       name: 'Assignee',
       fieldName: 'assignee',
       maxWidth: 100,
       onRender: (item: any) => <span style={cellStyle}>{item.assignee?.name}</span>,
     },
-            {
+    {
       key: 'createdAt',
       name: 'Created At',
       fieldName: 'createdAt',
-      maxWidth: 100,
-      onRender: (item: any) => <span style={cellStyle}>{item.createdAt}</span>,
+      maxWidth: 180,
+      onRender: (item: any) => {
+        const dateStr = item.createdBy?.date;
+        const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString('en-GB') : 'N/A';
+        return <span style={cellStyle}>{formattedDate}</span>;
+      }
+
     },
     {
       key: 'file',
@@ -187,19 +191,19 @@ const ClientPage: React.FC = () => {
     },
   ];
   const criteria: IDropdownOption[] = [
-    { key: 'type', text: 'Task Type' },
+    { key: 'Type', text: 'Task Type' },
   ];
   const value: Record<string, IDropdownOption[]> = {
-    type:[
-          { key: 'Send Printed Incorporation Document', text: 'Send Printed Incorporation Document' },
-    { key: 'Confirmation Statement', text: 'Confirmation Statement' },
-    { key: 'VAT Return', text: 'VAT Return' },
-    { key: 'Dormant Company Accounts', text: 'Dormant Company Accounts' },
-    { key: 'HMRC Authorisation process', text: 'HMRC Authorisation process' },
-    { key: 'Weekly Payroll', text: 'Weekly Payroll' },
-    { key: 'Annual Payroll', text: 'Annual Payroll' },
-    { key: 'Monthly Bookkeeping', text: 'Monthly Bookkeeping' },
-    { key: 'VAT Registration', text: 'VAT Registration' },
+    Type: [
+      { key: 'Send Printed Incorporation Document', text: 'Send Printed Incorporation Document' },
+      { key: 'Confirmation Statement', text: 'Confirmation Statement' },
+      { key: 'VAT Return', text: 'VAT Return' },
+      { key: 'Dormant Company Accounts', text: 'Dormant Company Accounts' },
+      { key: 'HMRC Authorisation process', text: 'HMRC Authorisation process' },
+      { key: 'Weekly Payroll', text: 'Weekly Payroll' },
+      { key: 'Annual Payroll', text: 'Annual Payroll' },
+      { key: 'Monthly Bookkeeping', text: 'Monthly Bookkeeping' },
+      { key: 'VAT Registration', text: 'VAT Registration' },
     ]
   };
   return (

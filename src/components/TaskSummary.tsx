@@ -168,10 +168,38 @@ const TaskSummary: React.FC = () => {
     <Stack tokens={{ childrenGap: 16 }} styles={{ root: { padding: 5, Width: 300, } }}>
       <Stack horizontal horizontalAlign="space-between" >
         <Stack>
+          <Text styles={{ root: labelStyle }}>Business name</Text>
+          <Link
+            href={`/admin/clients/${task.businessDetails?.id}`}
+            styles={{
+              root: {
+                ...valueStyle,
+                fontSize: 14,
+                padding: '4px 8px',
+                backgroundColor: '#fffecd',
+                color: '#504e00ff',
+                borderRadius: 6,
+                display: 'inline-block',
+                fontWeight: 600,
+                textDecoration: 'none',
+                cursor: 'pointer',
+                width: "max-content"
+              }
+            }}
+          >
+            {task.businessDetails?.name || 'N/A'}
+          </Link>
+        </Stack>
+        {role !== "Staff" && <IconButton onClick={openPanel} styles={{ root: { border: "none", padding: 0, color: "black" } }} > <Edit size={20} />  </IconButton>}
+      </Stack>
+
+      <Stack >
+
+        <Stack>
           <Text styles={{ root: labelStyle }}>Task name</Text>
           <Link styles={{ root: { ...valueStyle, color: '#0078d4', fontSize: 16 } }}>{task.title || 'N/A'}</Link>
         </Stack>
-        {role !== "Staff" && <IconButton onClick={openPanel} styles={{ root: { border: "none", padding: 0, color: "black" } }} > <Edit size={20} />  </IconButton>}
+
       </Stack>
 
       <Stack tokens={{ childrenGap: 6 }}>
