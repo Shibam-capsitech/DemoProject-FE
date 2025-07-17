@@ -16,7 +16,7 @@ const routeNameMap: { [key: string]: string } = {
 function CustomDivider(_: IDividerAsProps): JSX.Element {
   return (
     <span aria-hidden="true" style={{ cursor: "default", padding: "0 4px", fontSize: "18px" }}>
-      <ChevronRight size="18px" />
+      <ChevronRight size="15px" />
     </span>
   );
 }
@@ -73,9 +73,9 @@ const Breadcrumbs: React.FC = () => {
         overflowAriaLabel="More links"
         dividerAs={CustomDivider}
         styles={{
-          root: { fontSize: "0.75rem" },
-          itemLink: { fontSize: "18px", lineHeight: "1.2" },
-          overflow: { fontSize: "18px" },
+          root: { fontSize: "0.70rem" },
+          itemLink: { fontSize: "13px", lineHeight: "1.2" },
+          overflow: { fontSize: "13px" },
         }}
       />
     </div>

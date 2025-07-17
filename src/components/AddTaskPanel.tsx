@@ -10,6 +10,7 @@ import {
   type IStyleFunctionOrObject,
   type IDatePickerStyleProps,
   type IDatePickerStyles,
+  IconButton,
 } from '@fluentui/react';
 import { useBoolean } from '@fluentui/react-hooks';
 import { useFormik } from 'formik';
@@ -18,6 +19,12 @@ import React, { useEffect, useState } from 'react';
 import apiService from '../api/apiService';
 import { toast } from 'react-toastify';
 import { useRefresh } from '../context/RefreshContext';
+import { useParams } from 'react-router-dom';
+
+type AddTaskPanelProps = {
+  businessName?: string | null;
+};
+
 
 const priorityOptions: IDropdownOption[] = [
   { key: 'High', text: 'High' },
@@ -50,7 +57,7 @@ const softDatePickerStyles: IStyleFunctionOrObject<IDatePickerStyleProps, IDateP
   },
 };
 
-function AddTaskPanel() {
+function AddTaskPanel({ businessName }: AddTaskPanelProps) {
   const [isOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
   const [businessOptions, setBusinessOptions] = useState<IDropdownOption[]>([]);
   const [assigneeOptions, setAssigneeOptions] = useState<IDropdownOption[]>([]);
@@ -101,7 +108,7 @@ function AddTaskPanel() {
     validate: values => {
       const errors: any = {};
       if (!values.type) errors.type = 'Type is required';
-      if (!values.businessId) errors.businessId = 'Business selection is required';
+      if (!values.businessId && !businessName) errors.businessId = 'Business selection is required';
       if (!values.title) errors.title = 'Title is required';
       if (!values.priority) errors.priority = 'Priority is required';
       if (values.startDate > values.dueDate) errors.startDate = 'Start must be before Due';
@@ -113,12 +120,18 @@ function AddTaskPanel() {
     },
     onSubmit: async values => {
       setSubmitting(true);
-      const selectedBusiness = businessOptions.find(opt => opt.key === values.businessId);
+
+      const selectedBusiness = businessName
+        ? businessOptions.find(opt => opt.text === businessName)
+        : businessOptions.find(opt => opt.key === values.businessId);
+
       const selectedAssignee = assigneeOptions.find(opt => opt.key === values.assignee);
+
       const businessDetails = {
-        id: values.businessId,
+        id: selectedBusiness?.key || '',
         name: selectedBusiness?.text || '',
       };
+
       const assignee = {
         id: selectedAssignee?.key || '',
         name: selectedAssignee?.text || '',
@@ -126,6 +139,7 @@ function AddTaskPanel() {
 
       try {
         const formData = new FormData();
+
         formData.append('type', values.type);
         formData.append('title', values.title);
         formData.append('startdate', values.startDate.toISOString());
@@ -140,12 +154,11 @@ function AddTaskPanel() {
         formData.append('assignee.id', assignee.id);
         formData.append('assignee.name', assignee.name);
 
-
         if (values.file) {
           formData.append('file', values.file);
         }
 
-        const res = await apiService.post('/Task/create-task', formData, {
+        await apiService.post('/Task/create-task', formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -161,8 +174,8 @@ function AddTaskPanel() {
       } finally {
         setSubmitting(false);
       }
-
     }
+
   });
 
   const onRenderFooterContent = (
@@ -176,12 +189,21 @@ function AddTaskPanel() {
 
   return (
     <>
-      <DefaultButton
-        onClick={openPanel}
-        text="Add"
-        onRenderIcon={() => <Plus size={19} />}
-        styles={{ root: { border: 'none', fontSize: '15px' } }}
-      />
+      {businessName ?
+        <IconButton
+          onClick={openPanel}
+        >
+          <Plus size={16} />
+        </IconButton>
+        :
+        <DefaultButton
+          onClick={openPanel}
+          onRenderIcon={() => <Plus size={19} />}
+          styles={{ root: { border: 'none', fontSize: '15px' } }}
+        >
+          Add
+        </DefaultButton>
+      }
       <Panel
         isOpen={isOpen}
         onDismiss={dismissPanel}
@@ -233,16 +255,26 @@ function AddTaskPanel() {
             }}
           />
 
-          <Dropdown
-            label="Business"
-            options={businessOptions}
-            selectedKey={formik.values.businessId}
-            onChange={(_, opt) => formik.setFieldValue('businessId', opt?.key)}
-            onBlur={() => formik.setFieldTouched('businessId', true)}
-            errorMessage={formik.touched.businessId ? formik.errors.businessId : undefined}
-            required
-            styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6, gridColumn: 'span 2' } }}
-          />
+          {businessName ? (
+            <TextField
+              label="Business"
+              value={businessName}
+              disabled
+            // styles={{ ...softFieldStyles, root: { gridColumn: 'span 2' } }}
+            />
+          ) : (
+            <Dropdown
+              label="Business"
+              options={businessOptions}
+              selectedKey={formik.values.businessId}
+              onChange={(_, opt) => formik.setFieldValue('businessId', opt?.key)}
+              onBlur={() => formik.setFieldTouched('businessId', true)}
+              errorMessage={formik.touched.businessId ? formik.errors.businessId : undefined}
+              required
+              styles={{ dropdown: { border: '1px solid #d0d0d0', borderRadius: 6, gridColumn: 'span 2' } }}
+            />
+          )}
+
 
           <TextField
             label="Title"

@@ -1,4 +1,3 @@
-// src/context/UserContext.tsx
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { jwtDecode } from 'jwt-decode';
 
@@ -14,6 +13,7 @@ interface UserContextType {
   email: string | null;
   username: string | null;
   role: string | null;
+  setUser: React.Dispatch<React.SetStateAction<UserContextType>>;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -24,30 +24,47 @@ export const UserProvider: React.FC<{ children: React.ReactNode }> = ({ children
     email: null,
     username: null,
     role: null,
+    setUser: () => {}, 
   });
-
   useEffect(() => {
     const token = sessionStorage.getItem('token');
     if (token) {
       try {
         const decoded = jwtDecode<UserPayload>(token);
-        setUser({
+        setUser(prev => ({
+          ...prev,
           id: decoded.sub,
           email: decoded.email,
           username: decoded.username,
           role: decoded.role,
-        });
-
-        console.log("UserContext loaded:", decoded); 
-
+        }));
+        console.log("UserContext initialized from token:", decoded);
       } catch (err) {
         console.error('Invalid token', err);
-        setUser({ id: null, email: null, username: null, role: null });
+        setUser(prev => ({
+          ...prev,
+          id: null,
+          email: null,
+          username: null,
+          role: null,
+        }));
       }
+    } else {
+      setUser(prev => ({
+        ...prev,
+        id: null,
+        email: null,
+        username: null,
+        role: null,
+      }));
     }
   }, []);
 
-  return <UserContext.Provider value={user}>{children}</UserContext.Provider>;
+  return (
+    <UserContext.Provider value={{ ...user, setUser }}>
+      {children}
+    </UserContext.Provider>
+  );
 };
 
 export const useUser = () => {

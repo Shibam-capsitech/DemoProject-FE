@@ -1,30 +1,57 @@
+"use client"
 import React, { useEffect, useState } from 'react';
 import CustomTable from '../components/DataTable';
 import Layout from '../components/Layout/Layout';
 import {
   DefaultButton,
+  Dialog,
+  DialogFooter,
   type IDropdownOption,
 } from '@fluentui/react';
-import { Trash2, Edit2, Eye, RefreshCcw } from 'lucide-react';
+import { Trash2, Edit2, Eye, RefreshCcw, Edit } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AddTaskPanel from '../components/AddTaskPanel';
 import apiService from '../api/apiService';
 import { useRefresh } from '../context/RefreshContext';
 import { max } from 'date-fns';
+import EditTaskPanel from '../components/EditTaskPanel';
+import { toast } from 'react-toastify';
 
 const cellStyle: React.CSSProperties = {
+  color: '#333',
   fontSize: 14,
-  padding: '4px 8px',
-  whiteSpace: 'nowrap',
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  width: "max-content",
 };
 
 const ClientPage: React.FC = () => {
   const [tasks, setTasks] = useState([]);
   const navigate = useNavigate();
   const { refresh } = useRefresh()
+  const [editPanelOpen, setEditPanelOpen] = useState(false);
+  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedToDelete, setSelectedToDelete] = useState<any>(null);
+  const {toggleRefresh} = useRefresh()
+  const handleEdit = (task: any) => {
+    setSelectedTaskId(task.id);  
+    setEditPanelOpen(true);
+  };
+  const handleDelete = (item: any) => {
+    setSelectedToDelete(item);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = async() => {
+    try {
+      await apiService.post(`/Task/delete-task/${selectedToDelete.id}`,{})
+    } catch (error) {
+      toast.error("Something went wrong !")
+    }
+    toggleRefresh()
+    console.log('Deleting:', selectedToDelete);
+    setIsDeleteDialogOpen(false);
+    setSelectedToDelete(null);
+  };
+
 
   useEffect(() => {
     fetchTasks();
@@ -59,6 +86,7 @@ const ClientPage: React.FC = () => {
       key: 'tid',
       name: 'Task ID',
       fieldName: 'tid',
+      minWidth: 100,
       maxWidth: 100,
       onRender: (item: any) => (
         <span
@@ -69,6 +97,7 @@ const ClientPage: React.FC = () => {
             padding: '2px 6px',
             borderRadius: 4,
             display: 'inline-block',
+            
           }}
         >
           {item.tid}
@@ -79,14 +108,14 @@ const ClientPage: React.FC = () => {
       key: 'title',
       name: 'Title',
       fieldName: 'title',
+      minWidth: 200,
       maxWidth: 200,
       onRender: (item: any) => (
         <span
           style={{
             color: '#0078d4',
-            textDecoration: 'underline',
             cursor: 'pointer',
-            ...cellStyle,
+            
           }}
           onClick={() => navigate(`/admin/tasks/${item.id}`)}
         >
@@ -98,6 +127,7 @@ const ClientPage: React.FC = () => {
       key: 'type',
       name: 'Type',
       fieldName: 'type',
+      minWidth: 150,
       maxWidth: 300,
       onRender: (item: any) => <span style={cellStyle}>{item.type}</span>,
     },
@@ -105,6 +135,7 @@ const ClientPage: React.FC = () => {
       key: 'businessName',
       name: 'Business Name',
       fieldName: 'businessName',
+      minWidth: 180,
       maxWidth: 200,
       onRender: (item: any) => <span style={cellStyle}>{item.businessDetails?.name}</span>,
     },
@@ -112,53 +143,55 @@ const ClientPage: React.FC = () => {
       key: 'startDate',
       name: 'Start Date',
       fieldName: 'startDate',
+      minWidth: 120,
       maxWidth: 100,
       onRender: (item: any) => (
-        <span style={cellStyle}>
-          {new Date(item.startDate).toLocaleDateString('en-GB')}
-        </span>
+        <span style={cellStyle}>{new Date(item.startDate).toLocaleDateString('en-GB')}</span>
       ),
     },
     {
       key: 'dueDate',
       name: 'Due Date',
       fieldName: 'dueDate',
+      minWidth: 120,
       maxWidth: 100,
       onRender: (item: any) => (
-        <span style={cellStyle}>
-          {new Date(item.dueDate).toLocaleDateString('en-GB')}
-        </span>
+        <span style={cellStyle}>{new Date(item.dueDate).toLocaleDateString('en-GB')}</span>
       ),
     },
     {
       key: 'deadline',
       name: 'Deadline',
       fieldName: 'deadline',
+      minWidth: 120,
       maxWidth: 100,
       onRender: (item: any) => (
-        <span style={cellStyle}>
-          {new Date(item.deadline).toLocaleDateString('en-GB')}
-        </span>
+        <span style={cellStyle}>{new Date(item.deadline).toLocaleDateString('en-GB')}</span>
       ),
     },
     {
       key: 'priority',
       name: 'Priority',
       fieldName: 'priority',
-      maxWidth: 100,
-      onRender: (item: any) => <span style={cellStyle}>{['High', 'Medium', 'Low'][item.priority] ?? item.priority}</span>,
+      minWidth: 80,
+      maxWidth: 80,
+      onRender: (item: any) => (
+        <span style={cellStyle}>{['High', 'Medium', 'Low'][item.priority] ?? item.priority}</span>
+      ),
     },
-    {
-      key: 'description',
-      name: 'Description',
-      fieldName: 'description',
-      maxWidth: 300,
-      onRender: (item: any) => <span style={cellStyle}>{item.description}</span>,
-    },
+    // {
+    //   key: 'description',
+    //   name: 'Description',
+    //   fieldName: 'description',
+    //   minWidth: 200,
+    //   maxWidth: 300,
+    //   onRender: (item: any) => <span style={cellStyle}>{item.description}</span>,
+    // },
     {
       key: 'assignee',
       name: 'Assignee',
       fieldName: 'assignee',
+      minWidth: 120,
       maxWidth: 100,
       onRender: (item: any) => <span style={cellStyle}>{item.assignee?.name}</span>,
     },
@@ -166,18 +199,19 @@ const ClientPage: React.FC = () => {
       key: 'createdAt',
       name: 'Created At',
       fieldName: 'createdAt',
-      maxWidth: 180,
+      minWidth: 110,
+      maxWidth: 170,
       onRender: (item: any) => {
         const dateStr = item.createdBy?.date;
         const formattedDate = dateStr ? new Date(dateStr).toLocaleDateString('en-GB') : 'N/A';
         return <span style={cellStyle}>{formattedDate}</span>;
-      }
-
+      },
     },
     {
       key: 'file',
       name: 'Attachment',
       fieldName: 'file',
+      minWidth: 80,
       onRender: (item: any) => (
         <a
           href={item.file}
@@ -189,6 +223,22 @@ const ClientPage: React.FC = () => {
         </a>
       ),
     },
+    // {
+    //   key: 'actions',
+    //   name: 'Actions',
+    //   fieldName: 'actions',
+    //   minWidth: 120,
+    //   onRender: (item: any) => (
+    //     <div style={{ display: 'flex', gap: 12, alignItems: 'center',}}>
+    //       <Edit
+    //         size={18}
+    //         color="#0078d4"
+    //         style={{ cursor: 'pointer',  }}
+    //         onClick={() => handleEdit(item)}
+    //       />
+    //     </div>
+    //   ),
+    // },
   ];
   const criteria: IDropdownOption[] = [
     { key: 'Type', text: 'Task Type' },
@@ -208,6 +258,30 @@ const ClientPage: React.FC = () => {
   };
   return (
     <Layout>
+      {selectedTaskId && (
+        <EditTaskPanel
+          isOpen={editPanelOpen}
+          onDismiss={() => setEditPanelOpen(false)}
+          taskId={selectedTaskId}
+          onSuccess={() => {
+            setEditPanelOpen(false);
+            toggleRefresh(); 
+          }}
+        />
+      )}
+      <Dialog
+        hidden={!isDeleteDialogOpen}
+        onDismiss={() => setIsDeleteDialogOpen(false)}
+        dialogContentProps={{
+          title: 'Confirm Deletion',
+          subText: `Are you sure you want to delete Task: "${selectedToDelete?.title}"? This action cannot be undone.`,
+        }}
+      >
+        <DialogFooter>
+          <DefaultButton onClick={confirmDelete} text="Confirm" />
+          <DefaultButton onClick={() => setIsDeleteDialogOpen(false)} text="Cancel" />
+        </DialogFooter>
+      </Dialog>
       <CustomTable
         items={tasks}
         columns={columns}

@@ -12,22 +12,31 @@ import {
     IconButton,
     type IColumn,
     DefaultButton,
+    Dialog,
+    DialogFooter,
 } from '@fluentui/react';
-import { Plus, Edit, Mail, RefreshCw, Edit2, } from 'lucide-react';
+import { Plus, Edit, Mail, RefreshCw, Edit2, Trash2, } from 'lucide-react';
 import Layout from '../components/Layout/Layout';
 import TaskHistory from '../components/TaskHistoryForBusinessesProfile';
 import apiService from '../api/apiService';
-import { useParams } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useBoolean } from '@fluentui/react-hooks';
 import EditBusinessPanel from '../components/EditBusinessPanel';
 import { useRefresh } from '../context/RefreshContext';
+import { useUser } from '../context/UserContext';
+import { toast } from 'react-toastify';
+import AddTaskPanel from '../components/AddTaskPanel';
 
 
 const ClientDetailsPage: React.FC = () => {
     const [taskView, setTaskView] = useState<'upcoming' | 'completed'>('upcoming');
     const [businessData, setBusinessData] = useState<any>(null);
     const { businessId } = useParams<{ businessId: string }>();
-    const { refresh } = useRefresh()
+    const { refresh, toggleRefresh } = useRefresh()
+    const { role, id } = useUser()
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [selectedToDelete, setSelectedToDelete] = useState<any>(null);
+    const navigate = useNavigate()
     // const filteredTasks = useMemo(
     //     () => tasks.filter(t => taskView === 'upcoming' ? t.status !== 'Completed' : t.status === 'Completed'),
     //     [taskView]
@@ -83,6 +92,26 @@ const ClientDetailsPage: React.FC = () => {
             return [];
         }
     }
+
+    const handleDelete = (item: any) => {
+        setSelectedToDelete(item);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = async () => {
+        try {
+            await apiService.post(`/Business/delete-business-by-id/${businessId}`, {})
+            navigate("/admin/clients")
+        } catch (error) {
+            toast.error("Something went wrong !")
+        }
+        toggleRefresh()
+        console.log('Deleting:', selectedToDelete);
+        setIsDeleteDialogOpen(false);
+        setSelectedToDelete(null);
+    };
+
+
     useEffect(() => {
         if (businessId) {
             fetchTasks(businessId)
@@ -94,6 +123,19 @@ const ClientDetailsPage: React.FC = () => {
 
     return (
         <Layout>
+            <Dialog
+                hidden={!isDeleteDialogOpen}
+                onDismiss={() => setIsDeleteDialogOpen(false)}
+                dialogContentProps={{
+                    title: 'Confirm Deletion',
+                    subText: `Are you sure you want to delete client: "${businessData?.name}"? This action cannot be undone.`,
+                }}
+            >
+                <DialogFooter>
+                    <DefaultButton onClick={confirmDelete} text="Confirm" />
+                    <DefaultButton onClick={() => setIsDeleteDialogOpen(false)} text="Cancel" />
+                </DialogFooter>
+            </Dialog>
             <Stack horizontal styles={{ root: { width: '100%', borderTop: "1px solid #f4f4f4" } }} tokens={{ childrenGap: 16 }}>
                 <Stack styles={{ root: { flex: 3, borderRight: "1px solid #f4f4f4", paddingRight: 12, marginTop: 12, height: "100vh" } }} tokens={{ childrenGap: 16 }}>
                     <Stack styles={{ root: { display: 'flex', flexDirection: 'row', alignItems: 'flex-start', gap: 8 } }}>
@@ -104,14 +146,14 @@ const ClientDetailsPage: React.FC = () => {
                         />
 
                         <Stack tokens={{ childrenGap: 8 }}>
-                            <Text variant="xxLarge">{businessData?.name}</Text>
+                            <Text variant="xLarge">{businessData?.name}</Text>
                             <Stack horizontal>
                                 <Text variant="large" styles={{ root: { background: '#e6f4ff', padding: '4px 8px', borderRadius: 4 } }}>
                                     {businessData?.bId}
                                 </Text>
-                                <IconButton onClick={() => { }} title="Add"><Plus size={16} /></IconButton>
-                                <IconButton onClick={() => { }} title="Edit"><Edit size={16} /></IconButton>
-                                <IconButton onClick={() => { }} title="Mail"><Mail size={16} /></IconButton>
+                                {(role === "Admin" || (businessData?.createdBy?.id == id)) &&
+                                    <IconButton onClick={handleDelete} title="Add" styles={{ root: { color: "red" } }}><Trash2 size={18} /></IconButton>
+                                }
                             </Stack>
                         </Stack>
                     </Stack>
@@ -144,30 +186,30 @@ const ClientDetailsPage: React.FC = () => {
                                 <EditBusinessPanel businessId={businessId ?? ''} isOpen={isEditOpen} onDismiss={dismissEditPanel} />
 
                                 <Stack horizontal horizontalAlign='space-between' wrap tokens={{ childrenGap: 16 }}>
-                                    <Stack grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4}}>
                                         <Text variant="mediumPlus">Type</Text>
                                         <Text>{businessData?.type}</Text>
                                     </Stack>
-                                    <Stack grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Building</Text>
                                         <Text>{businessData?.address.building}</Text>
                                     </Stack>
-                                    <Stack grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">City</Text>
                                         <Text>{businessData?.address.city}</Text>
                                     </Stack>
                                 </Stack>
 
                                 <Stack horizontal horizontalAlign='space-between' wrap tokens={{ childrenGap: 16 }}>
-                                    <Stack grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">State</Text>
                                         <Text>{businessData?.address.state}</Text>
                                     </Stack>
-                                    <Stack grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Country</Text>
                                         <Text>{businessData?.address.country}</Text>
                                     </Stack>
-                                    <Stack grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Postcode</Text>
                                         <Text>{businessData?.address.postcode}</Text>
                                     </Stack>
@@ -246,11 +288,11 @@ const ClientDetailsPage: React.FC = () => {
                     </Pivot>
                 </Stack>
 
-                <Stack styles={{ root: { flex: 1, } }} tokens={{ childrenGap: 12 }}>
+                <Stack styles={{ root: { flex: 1, paddingTop:"10px" } }} tokens={{ childrenGap: 12 }}>
                     <Stack horizontal horizontalAlign="space-between" verticalAlign="center">
                         <Text variant="large">Tasks</Text>
                         <Stack horizontal tokens={{ childrenGap: 8 }} verticalAlign="center">
-                            <Dropdown
+                            {/* <Dropdown
                                 selectedKey={taskView}
                                 onChange={(_, option) => setTaskView(option?.key as any)}
                                 options={[
@@ -258,8 +300,9 @@ const ClientDetailsPage: React.FC = () => {
                                     { key: 'completed', text: 'Completed', itemType: DropdownMenuItemType.Normal },
                                 ]}
                                 styles={{ root: { width: 120 } }}
-                            />
+                            /> */}
                             <IconButton onClick={() => { }}><RefreshCw size={16} /></IconButton>
+                            <AddTaskPanel businessName={businessData?.name}/>
                         </Stack>
                     </Stack>
                     <DetailsList

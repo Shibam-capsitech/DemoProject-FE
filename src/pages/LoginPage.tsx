@@ -11,9 +11,12 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import apiService from "../api/apiService";
+import { useUser } from "../context/UserContext";
+import { jwtDecode } from "jwt-decode";
 
 const LoginPage: React.FC = () => {
   const navigate = useNavigate();
+  const { setUser } = useUser();
 
   const validationSchema = Yup.object({
     email: Yup.string()
@@ -33,8 +36,26 @@ const LoginPage: React.FC = () => {
     onSubmit: async (values) => {
       try {
         const response = await apiService.post("/User/login", values);
+        const token = response.token;
+
+        sessionStorage.setItem("token", token);
+
+        const decoded = jwtDecode<{
+          sub: string;
+          email: string;
+          username: string;
+          role: string;
+        }>(token);
+
+        setUser({
+          id: decoded.sub,
+          email: decoded.email,
+          username: decoded.username,
+          role: decoded.role,
+          setUser, 
+        });
+
         toast.success("Login successful!");
-        sessionStorage.setItem("token", response.token);
         navigate("/admin/clients");
       } catch (error: any) {
         toast.error(error?.response?.data || "Login error");

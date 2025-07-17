@@ -29,7 +29,7 @@ const AddSubtaskPanel = ({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: ()
         try {
             const res = await apiService.get(`/Task/get-task-by-id/${taskId}`);
             setTask(res.task);
-            setAlreadyExistedSubTasks(res.task.subTask || []);
+            setAlreadyExistedSubTasks(res.task.subtask || []);
         } catch (error) {
             console.error('Error fetching task details:', error);
         }

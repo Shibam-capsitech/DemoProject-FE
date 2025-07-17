@@ -31,12 +31,13 @@ const TaskSteps = () => {
   const [subTask, setSubTask] = useState<any[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [selection, setSelection] = useState<Selection | null>(null);
-  const {toggleRefresh} = useRefresh()
+  const { toggleRefresh } = useRefresh()
 
   const fetchTask = async () => {
     try {
       const res = await apiService.get(`/Task/get-task-by-id/${taskId}`);
-      setSubTask(res.task.subtask || []);
+      const activeSubtasks = (res.task.subtask || []).filter(st => st.isActive);
+      setSubTask(activeSubtasks);
     } catch (error) {
       console.error('Error fetching task:', error);
     }
@@ -100,7 +101,7 @@ const TaskSteps = () => {
 
   const handleSubTaskDelete = async (item: any) => {
     try {
-      await apiService.post(`/Task/delete-subtask/${item.id}?taskId=${taskId}`,{});
+      await apiService.post(`/Task/delete-subtask/${item.id}?taskId=${taskId}`, {});
       setSubTask((prev) => prev.filter((task) => task.id !== item.id));
       toast.success("Subtask deleted successfully");
     } catch (error) {
@@ -138,7 +139,7 @@ const TaskSteps = () => {
       minWidth: 50,
       isResizable: true,
       onRender: (item: any) => (
-        <IconButton onClick={()=>handleSubTaskDelete(item)} title="Delete"><Trash size={20} /></IconButton>
+        <IconButton onClick={() => handleSubTaskDelete(item)} title="Delete"><Trash size={20} /></IconButton>
       ),
     },
   ];
@@ -149,7 +150,7 @@ const TaskSteps = () => {
     <Stack tokens={{ childrenGap: 16 }}>
       <Stack horizontal horizontalAlign="space-between" verticalAlign="center">
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 8 }}>
-          <Text styles={{ root: { fontSize: "18px", fontWeight: "500" } }}>Task Steps</Text>
+          <Text styles={{ root: { fontSize: "16px", fontWeight: "500" } }}>Task Steps</Text>
           <IconButton onClick={() => setIsSubtaskPanelOpen(true)} title="Add"><Plus size={20} /></IconButton>
         </Stack>
         <AddSubtaskPanel

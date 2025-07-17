@@ -13,16 +13,16 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const toggleCollapse = () => setCollapsed((prev) => !prev);
 
     return (
-        <div style={{ display: "flex" }}>
+        <div style={{ display: "flex", overflowY:"hidden" }}>
             <Sidebar collapsed={collapsed} toggleCollapse={toggleCollapse} />
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: "100%" }}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", minHeight: "100%", overflowY:"hidden" }}>
                 <Header />
                 <Breadcrumbs/>
                 <main
                     style={{
                         flex: 1,
                         padding: "15px",
-                        overflow: "auto",
+                         overflowY:"hidden"
                     }}
                 >
                     {children}

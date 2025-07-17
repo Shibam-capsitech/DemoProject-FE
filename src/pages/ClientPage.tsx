@@ -3,36 +3,47 @@ import React, { useEffect, useState } from 'react';
 import CustomTable from '../components/DataTable';
 import Layout from '../components/Layout/Layout';
 import { DefaultButton, type IDropdownOption } from '@fluentui/react';
-import { Trash2, Edit2, Eye, RefreshCcw } from 'lucide-react';
+import { Trash2, RefreshCcw, Edit } from 'lucide-react';
 import AddBusinessPanel from '../components/AddBusinessPanel';
 import apiService from '../api/apiService';
 import { toast } from 'react-toastify';
 import { useRefresh } from '../context/RefreshContext';
 import { useNavigate } from 'react-router-dom';
+import EditBusinessPanel from '../components/EditBusinessPanel';
+import { Dialog, DialogFooter, } from '@fluentui/react';
 
 
 const ClientPage: React.FC = () => {
   const [clientData, setClientData] = useState<any[]>([]);
   const { refresh } = useRefresh()
   const navigate = useNavigate()
+  const [selectedBusiness, setSelectedBusiness] = useState<any>(null);
+  const [isEditPanelOpen, setIsEditPanelOpen] = useState(false);
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [selectedToDelete, setSelectedToDelete] = useState<any>(null);
+
+
+  const handleEdit = (item: any) => {
+    setSelectedBusiness(item);
+    setIsEditPanelOpen(true);
+  };
   const columns = [
     {
       key: 'bid',
       name: 'Client ID',
       fieldName: 'bid',
+      minWidth: 100,
       maxWidth: 100,
-      isResizable: true,
       onRender: (item: any) => (
-        <span
-          style={{
-            fontFamily: 'monospace',
-            backgroundColor: '#d4f4dd',
-            color: '#1b5e20',
-            padding: '2px 6px',
-            borderRadius: 4,
-            display: 'inline-block',
-          }}
-        >
+        <span style={{
+          fontFamily: 'monospace',
+          backgroundColor: '#d4f4dd',
+          color: '#1b5e20',
+          padding: '2px 6px',
+          borderRadius: 4,
+          display: 'inline-block',
+        }}>
           {item.bId}
         </span>
       ),
@@ -41,45 +52,47 @@ const ClientPage: React.FC = () => {
       key: 'type',
       name: 'Type',
       fieldName: 'type',
+      minWidth: 100,
       maxWidth: 150,
-      isResizable: true,
       onRender: (item: any) => <span style={{ color: '#555' }}>{item.type}</span>,
     },
     {
       key: 'name',
       name: 'Business Name',
       fieldName: 'name',
-      maxWidth: 260,
-      isResizable: true,
-      onRender: (item: any) => <span style={{ color: '#0078d4', cursor: "pointer" }} onClick={(e: any) => navigate(`/admin/clients/${item.id}`)}>{item.name}</span>,
+      minWidth: 150,
+      onRender: (item: any) => (
+        <span style={{ color: '#0078d4', cursor: "pointer" }} onClick={() => navigate(`/admin/clients/${item.id}`)}>
+          {item.name}
+        </span>
+      ),
     },
     {
       key: 'building',
       name: 'Building',
       fieldName: 'building',
-      maxWidth: 200,
-      isResizable: true,
+      minWidth: 150,
       onRender: (item: any) => <span style={{ color: '#444' }}>{item.address.building}</span>,
     },
     {
       key: 'city',
       name: 'City',
       fieldName: 'city',
-      maxWidth: 200,
+      minWidth: 100,
       onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.address.city}</span>,
     },
     {
       key: 'state',
       name: 'State',
       fieldName: 'state',
-      minWidth: 200,
+      minWidth: 100,
       onRender: (item: any) => <span style={{ textTransform: 'capitalize' }}>{item.address.state}</span>,
     },
     {
       key: 'country',
       name: 'Country',
       fieldName: 'country',
-      minWidth: 200,
+      minWidth: 100,
       onRender: (item: any) => <span>{item.address.country}</span>,
     },
     {
@@ -93,29 +106,41 @@ const ClientPage: React.FC = () => {
       key: 'username',
       name: 'Username',
       fieldName: 'username',
-      minWidth: 200,
+      minWidth: 150,
       onRender: (item: any) => <span style={{ fontWeight: 500 }}>{item.createdBy?.name}</span>,
     },
     {
       key: 'email',
       name: 'Email',
       fieldName: 'email',
-      minWidth: 180,
-      isResizable: true,
+      minWidth: 200,
       onRender: (item: any) => <span style={{ fontStyle: 'italic', color: '#444' }}>{item.createdBy?.email}</span>,
     },
     {
       key: 'createdAt',
       name: 'Created At',
       fieldName: 'createdAt',
-      minWidth: 140,
+      minWidth: 120,
       onRender: (item: any) => (
         <span style={{ color: '#888' }}>
           {new Date(item.createdBy?.date).toLocaleDateString('en-GB')}
         </span>
       ),
     },
+    // {
+    //   key: 'actions',
+    //   name: 'Actions',
+    //   fieldName: 'actions',
+    //   minWidth: 120,
+    //   onRender: (item: any) => (
+    //     <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+    //       <Edit size={18} color="#0078d4" style={{ cursor: 'pointer' }} onClick={() => handleEdit(item)} />
+    //       <Trash2 size={18} color="#d32f2f" style={{ cursor: 'pointer' }} onClick={() => handleDelete(item)} />
+    //     </div>
+    //   ),
+    // },
   ];
+
 
   const criteria: IDropdownOption[] = [
     { key: 'Type', text: 'Business Type' },
@@ -152,7 +177,7 @@ const ClientPage: React.FC = () => {
         // email: b.createdby?.email || 'N/A',
         // createdAt: b.createdby.date,
         address: b.address,
-        createdBy : b.createdBy
+        createdBy: b.createdBy
       }));
 
       setClientData(formatted);
@@ -163,6 +188,18 @@ const ClientPage: React.FC = () => {
       console.error('Error fetching client data:', error);
     }
   };
+  const handleDelete = (item: any) => {
+    setSelectedToDelete(item);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const confirmDelete = () => {
+    // Perform deletion logic here
+    console.log('Deleting:', selectedToDelete);
+    setIsDeleteDialogOpen(false);
+    // Optionally reset
+    setSelectedToDelete(null);
+  };
 
   useEffect(() => {
     fetchClientData();
@@ -170,6 +207,26 @@ const ClientPage: React.FC = () => {
 
   return (
     <Layout>
+      {isEditPanelOpen && (
+        <EditBusinessPanel
+          isOpen={isEditPanelOpen}
+          onDismiss={() => setIsEditPanelOpen(false)}
+          businessId={selectedBusiness.id}
+        />
+      )}
+      <Dialog
+        hidden={!isDeleteDialogOpen}
+        onDismiss={() => setIsDeleteDialogOpen(false)}
+        dialogContentProps={{
+          title: 'Confirm Deletion',
+          subText: `Are you sure you want to delete client: "${selectedToDelete?.name}"? This action cannot be undone.`,
+        }}
+      >
+        <DialogFooter>
+          <DefaultButton onClick={confirmDelete} text="Confirm" />
+          <DefaultButton onClick={() => setIsDeleteDialogOpen(false)} text="Cancel" />
+        </DialogFooter>
+      </Dialog>
       <CustomTable
         items={clientData}
         columns={columns}
