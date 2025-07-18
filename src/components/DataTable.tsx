@@ -23,6 +23,7 @@ import { DefaultButton, PrimaryButton } from "@fluentui/react/lib/Button";
 import { useBoolean, useId } from "@fluentui/react-hooks";
 import apiService from "../api/apiService";
 import { useLocation } from "react-router-dom";
+import { boolean } from "yup";
 
 interface ColumnConfig {
   key: string;
@@ -64,7 +65,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   const [selectedCriteria, setSelectedCriteria] = useState<string>();
   const [selectedValue, setSelectedValue] = useState<string>();
   const [filteredTableData, setFilteredTableData] = useState<any[] | null>(null);
-
+  const [isFilterApplied, setIsFilterApplied] = useState(false)
   const location = useLocation();
   const isClientActive = location.pathname.includes("client");
   const isTaskActive = location.pathname.includes("task");
@@ -123,6 +124,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
 
   const handleApplyFilter = () => {
     handleSearch(null, filterText);
+    setIsFilterApplied(true)
     toggleIsCalloutVisible();
   };
 
@@ -165,6 +167,40 @@ const CustomTable: React.FC<CustomTableProps> = ({
               }}
             />
           </div>
+          {isFilterApplied && (
+            <Stack
+              horizontal
+              verticalAlign="center"
+              tokens={{ childrenGap: 6 }}
+              styles={{ root: { marginTop: 0 } }}
+            >
+              <span
+                style={{
+                  background: "#e5f1fb",
+                  color: "#004578",
+                  padding: "6px 12px",
+                  borderRadius: 20,
+                  fontSize: 14,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                {`${selectedCriteria}: ${selectedValue}`}
+                <span
+                  style={{ cursor: "pointer", fontWeight: "bold" }}
+                  onClick={() => {
+                    setSelectedCriteria(undefined);
+                    setSelectedValue(undefined);
+                    setIsFilterApplied(false)
+                    setFilteredTableData(null);
+                  }}
+                >
+                  &times;
+                </span>
+              </span>
+            </Stack>
+          )}
 
           <DefaultButton
             id={buttonId}
