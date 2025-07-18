@@ -17,6 +17,8 @@ import {
   ResponsiveContainer,
   BarChart,
   Bar,
+  Legend,
+  Rectangle,
 } from 'recharts';
 import apiService from '../api/apiService';
 import { format, eachDayOfInterval, startOfMonth, endOfMonth } from 'date-fns';
@@ -83,20 +85,72 @@ const Dashboard: React.FC = () => {
     { key: 'lastMonth', text: 'Last Month' },
   ];
 
-  const cardData = [
-    { title: 'Total Clients', value: 128, icon: <Users style={{ fontSize: 25, color: '#0078d4' }}/> },
-    { title: 'Pending Tasks', value: 24, icon: <Hourglass style={{ fontSize: 25, color: '#0078d4' }}/> },
-    { title: 'Completed Tasks', value: 76, icon: <SquareCheckBig style={{ fontSize: 25, color: '#0078d4' }}/> },
-  ];
+
   const completedThisMonth = 24;
   var completedLastMonth = 16;
-  const percentChange = completedLastMonth === 0
-    ? 'N/A'
-    : (((completedThisMonth - completedLastMonth) / completedLastMonth) * 100).toFixed(1);
 
   const isPositive = completedThisMonth >= completedLastMonth;
-  const trendIcon = isPositive ? <TrendingUp /> : <TrendingDown />;
+
   const trendColor = isPositive ? '#28a745' : '#d32f2f';
+
+  const [stats, setStats] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const response = await apiService.get('/Task/dashboard-stats');
+        setStats(response);
+      } catch (error) {
+        console.error('Error fetching dashboard stats:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchStats();
+  }, []);
+
+
+  const {
+    currentMonthCompleted = 0,
+    previousMonthCompleted = 0,
+    totalCompleted = 0,
+    totalIncomplete = 0,
+    totalBusinesses = 0,
+  } = stats ?? {};
+
+
+  const percentChange =
+    previousMonthCompleted === 0
+      ? 'N/A'
+      : (((currentMonthCompleted - previousMonthCompleted) / previousMonthCompleted) * 100).toFixed(1);
+
+
+  const isUp = percentChange !== 'N/A' && parseFloat(percentChange) >= 0;
+  const trendIcon = (
+    <FontIcon
+      iconName={isUp ? 'CaretUpSolid8' : 'CaretDownSolid8'}
+      style={{ color: isUp ? 'green' : 'red', fontSize: 16 }}
+    />
+  );
+
+  const cardData = [
+    {
+      title: 'Total Completed Tasks',
+      value: totalCompleted,
+      icon: <FontIcon iconName="Completed" style={{ fontSize: 25, color: '#0078d4' }} />,
+    },
+    {
+      title: 'Total Pending Tasks',
+      value: totalIncomplete,
+      icon: <FontIcon iconName="HourGlass" style={{ fontSize: 25, color: '#cf9800ff' }} />,
+    },
+    {
+      title: 'Total Businesses',
+      value: totalBusinesses,
+      icon: <FontIcon iconName="BusinessCenterLogo" style={{ fontSize: 25, color: '#0099bc' }} />,
+    },
+  ];
 
 
   return (
@@ -104,69 +158,83 @@ const Dashboard: React.FC = () => {
       <Stack tokens={{ childrenGap: 32 }} styles={{ root: { padding: 32, paddingTop: 10 } }}>
         <Stack>
 
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-              gap: 20,
+          <Stack
+            horizontal
+            wrap
+            tokens={{ childrenGap: 20 }}
+            styles={{
+              root: {
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+              },
             }}
           >
-            <div
-              style={{
-                background: '#ffffff',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
-                borderRadius: 12,
-                padding: 20,
-                display: 'flex',
-                flexDirection: 'column',
-                gap: 6,
-              }}
-            >
-              <Stack styles={{root:{display:"flex", flexDirection:"row", gap:"10px"}}}>
-              <FontIcon iconName="Completed" style={{ fontSize: 25, color: '#0078d4' }} />
-              <Text variant="xLarge" styles={{ root: { fontWeight: 600 } }}>
-                {completedThisMonth} / {completedLastMonth}
-              </Text>
-              </Stack>
-              <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 6 }}>
-                 {trendIcon}
-                <Text variant="mediumPlus" styles={{ root: { color: '#666' } }}>
-                  {percentChange === 'N/A' ? 'No data for last month' : `${percentChange}% from last month`}
-                </Text>
-              </Stack>
-            </div>
-
-            {cardData.map(card => (
-              <div
-                key={card.title}
-                style={{
+            <Stack
+              tokens={{ childrenGap: 6 }}
+              styles={{
+                root: {
                   background: '#ffffff',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
                   borderRadius: 12,
                   padding: 20,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 6,
+                  width: '220px', // Fixed width for uniformity
+                  flexGrow: 1,
+                  flexBasis: '220px',
+                },
+              }}
+            >
+              <Stack horizontal tokens={{ childrenGap: 10 }} verticalAlign="center">
+                <FontIcon iconName="CompletedSolid" style={{ fontSize: 25, color: '#0078d4' }} />
+                <Text variant="xLarge" styles={{ root: { fontWeight: 600 } }}>
+                  {currentMonthCompleted} / {previousMonthCompleted}
+                </Text>
+              </Stack>
+              <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 6 }}>
+                {trendIcon}
+                <Text variant="mediumPlus" styles={{ root: { color: '#666' } }}>
+                  {percentChange === 'N/A'
+                    ? 'No data for last month'
+                    : `${percentChange}% from last month`}
+                </Text>
+              </Stack>
+            </Stack>
+
+            {cardData.map((card) => (
+              <Stack
+                key={card.title}
+                tokens={{ childrenGap: 6 }}
+                styles={{
+                  root: {
+                    background: '#ffffff',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+                    borderRadius: 12,
+                    padding: 20,
+                    width: '220px', // Same fixed width
+                    flexGrow: 1,
+                    flexBasis: '220px',
+                  },
                 }}
               >
-                <Stack styles={{root:{display:"flex", flexDirection:"row", gap:"10px"}}}>
+                <Stack horizontal tokens={{ childrenGap: 10 }} verticalAlign="center">
                   {card.icon}
-                <Text variant="xLarge" styles={{ root: { fontWeight: 600 } }}>{card.value}</Text>
+                  <Text variant="xLarge" styles={{ root: { fontWeight: 600 } }}>{card.value}</Text>
                 </Stack>
                 <Text variant="mediumPlus" styles={{ root: { color: '#666' } }}>{card.title}</Text>
-              </div>
+              </Stack>
             ))}
-          </div>
+          </Stack>
+
         </Stack>
         <Stack >
 
-          <Stack styles={{root:{ display:"flex",justifyContent:"end", alignItems:"end" }}}>
+          <Stack styles={{ root: { display: "flex", justifyContent: "end", alignItems: "end" } }}>
             <Dropdown
-            selectedKey={selectedMonth}
-            options={dropdownOptions}
-            onChange={(_, option) => setSelectedMonth(option?.key as 'thisMonth' | 'lastMonth')}
-            
-          />
+              selectedKey={selectedMonth}
+              options={dropdownOptions}
+              onChange={(_, option) => setSelectedMonth(option?.key as 'thisMonth' | 'lastMonth')}
+
+            />
           </Stack>
         </Stack>
 
@@ -186,19 +254,44 @@ const Dashboard: React.FC = () => {
         </div>
 
         <Text variant="large" styles={{ root: { fontWeight: 600, marginTop: 20 } }}>
-          Tasks created per user ({selectedMonth === 'thisMonth' ? 'This Month' : 'Last Month'})
+          Tasks created vs completed per user ({selectedMonth === 'thisMonth' ? 'This Month' : 'Last Month'})
         </Text>
-        <div style={{ background: '#fff', padding: 10, borderRadius: 12, boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={taskPerUser}>
+
+        <div
+          style={{
+            background: '#fff',
+            padding: 10,
+            borderRadius: 12,
+            boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+          }}
+        >
+          <ResponsiveContainer width="100%" height={300}>
+            <BarChart
+              data={taskPerUser}
+              margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
+            >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
               <Tooltip />
-              <Bar dataKey="count" fill="#0078d4a6" />
+              <Legend />
+              <Bar
+                dataKey="creation_count"
+                fill="#1a6ff7c5" 
+                name="Created"
+                activeBar={<Rectangle fill="#1a6df7" stroke="#1253c0" />} 
+              />
+              <Bar
+                dataKey="completion_count"
+                fill="#00b96cbb" // Fluent success green
+                name="Completed"
+                activeBar={<Rectangle fill="#00b96b" stroke="#008a55" />} 
+              />
+
             </BarChart>
           </ResponsiveContainer>
         </div>
+
       </Stack>
     </Layout>
   );

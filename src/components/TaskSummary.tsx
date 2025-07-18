@@ -45,7 +45,7 @@ const TaskSummary: React.FC = () => {
     try {
       const res = await apiService.get(`/Task/get-task-by-id/${taskId}`);
       setTask(res.task);
-      if (role === "Admin" || (task.createdBy.id === id)) {
+      if ((task.createdBy.id === id) || task.isCompleted === false  || role === "Admin") {
         setHasAccessToDelete(true)
         setHasAccessToEdit(true)
       }

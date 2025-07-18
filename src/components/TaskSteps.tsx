@@ -9,10 +9,14 @@ import {
   CheckboxVisibility,
   Selection,
   SelectionMode,
+  Dialog,
+  DialogFooter,
+  PrimaryButton,
+  DefaultButton,
   type IDropdownOption,
   type IColumn,
 } from '@fluentui/react';
-import { Delete, Plus, Trash } from 'lucide-react';
+import { Plus, Trash } from 'lucide-react';
 import { useParams } from 'react-router';
 import apiService from '../api/apiService';
 import AddSubtaskPanel from './AddSubTaskPanel';
@@ -24,20 +28,27 @@ const statusOptions: IDropdownOption[] = [
   { key: 'In Progress', text: 'In Progress' },
   { key: 'Completed', text: 'Completed' },
 ];
-;
 
 const TaskSteps = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const [subTask, setSubTask] = useState<any[]>([]);
   const [selectedKeys, setSelectedKeys] = useState<Set<string>>(new Set());
   const [selection, setSelection] = useState<Selection | null>(null);
-  const { toggleRefresh } = useRefresh()
+  const { toggleRefresh } = useRefresh();
+  const [isSubtaskPanelOpen, setIsSubtaskPanelOpen] = useState(false);
+  const [isTaskCompleted, setIsTaskCompleted] = useState(false);
+
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<{ key: string | number; id: string } | null>(null);
+
+  const [showPostDeleteDialog, setShowPostDeleteDialog] = useState(false);
 
   const fetchTask = async () => {
     try {
       const res = await apiService.get(`/Task/get-task-by-id/${taskId}`);
       const activeSubtasks = (res.task.subtask || []).filter(st => st.isActive);
       setSubTask(activeSubtasks);
+      setIsTaskCompleted(res.task.isCompleted);
     } catch (error) {
       console.error('Error fetching task:', error);
     }
@@ -56,15 +67,22 @@ const TaskSteps = () => {
     });
     setSelection(sel);
   }, [subTask]);
+
   const handleStatusChange = async (key: string | number, itemId?: string) => {
     if (itemId) {
+      const remainingIncomplete = subTask.filter(st => st.status !== 'Completed' && st.id !== itemId);
+
+      if (key === 'Completed' && remainingIncomplete.length === 0) {
+        setPendingStatusChange({ key, id: itemId });
+        setShowConfirmDialog(true);
+        return;
+      }
+
       setSubTask((prev) =>
         prev.map((task) =>
           task.id === itemId ? { ...task, status: key } : task
         )
       );
-      const formData = new FormData();
-      formData.append('status', key as string);
 
       try {
         await apiService.post(`/Task/change-subtask-status/${itemId}?status=${key}&taskId=${taskId}`, {});
@@ -81,6 +99,7 @@ const TaskSteps = () => {
           selectedKeys.has(task.id) ? { ...task, status: key } : task
         )
       );
+
       const updatePromises = Array.from(selectedKeys).map(async (id) => {
         try {
           await apiService.post(`/Task/change-subtask-status/${id}?status=${key}&taskId=${taskId}`, {});
@@ -102,11 +121,49 @@ const TaskSteps = () => {
   const handleSubTaskDelete = async (item: any) => {
     try {
       await apiService.post(`/Task/delete-subtask/${item.id}?taskId=${taskId}`, {});
-      setSubTask((prev) => prev.filter((task) => task.id !== item.id));
+      const updated = subTask.filter((task) => task.id !== item.id);
+      setSubTask(updated);
       toast.success("Subtask deleted successfully");
+
+      const allCompleted = updated.every(st => st.status === 'Completed');
+      if (updated.length > 0 && allCompleted && !isTaskCompleted) {
+        setShowPostDeleteDialog(true);
+      }
+
     } catch (error) {
       toast.error("Failed to delete subtask");
       console.error('Error deleting subtask:', error);
+    }
+  };
+
+  const confirmCompleteTask = async () => {
+    if (!pendingStatusChange) return;
+
+    const { id, key } = pendingStatusChange;
+    try {
+      await apiService.post(`/Task/change-subtask-status/${id}?status=${key}&taskId=${taskId}`, {});
+      await apiService.post(`/Task/complete-task/${taskId}`, {});
+      toast.success("Task marked as completed");
+      setShowConfirmDialog(false);
+      setPendingStatusChange(null);
+      await fetchTask();
+      toggleRefresh();
+    } catch (error) {
+      toast.error("Failed to complete task");
+      console.error(error);
+    }
+  };
+
+  const confirmPostDeleteCompleteTask = async () => {
+    try {
+      await apiService.post(`/Task/complete-task/${taskId}`, {});
+      toast.success("Task marked as completed");
+      setShowPostDeleteDialog(false);
+      await fetchTask();
+      toggleRefresh();
+    } catch (error) {
+      toast.error("Failed to complete task");
+      console.error(error);
     }
   };
 
@@ -126,6 +183,7 @@ const TaskSteps = () => {
       isResizable: true,
       onRender: (item: any) => (
         <Dropdown
+          disabled={isTaskCompleted}
           selectedKey={item.status}
           options={statusOptions}
           onChange={(_, option) => handleStatusChange(option!.key, item.id)}
@@ -138,21 +196,25 @@ const TaskSteps = () => {
       fieldName: 'action',
       minWidth: 50,
       isResizable: true,
-      onRender: (item: any) => (
-        <IconButton onClick={() => handleSubTaskDelete(item)} title="Delete"><Trash size={20} /></IconButton>
-      ),
+      onRender: (item: any) =>
+        isTaskCompleted ? null : (
+          <IconButton onClick={() => handleSubTaskDelete(item)} title="Delete"><Trash size={20} /></IconButton>
+        ),
     },
   ];
-  const [isSubtaskPanelOpen, setIsSubtaskPanelOpen] = useState(false);
-
 
   return (
     <Stack tokens={{ childrenGap: 16 }}>
       <Stack horizontal horizontalAlign="space-between" verticalAlign="center">
         <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 8 }}>
           <Text styles={{ root: { fontSize: "16px", fontWeight: "500" } }}>Task Steps</Text>
-          <IconButton onClick={() => setIsSubtaskPanelOpen(true)} title="Add"><Plus size={20} /></IconButton>
+          {!isTaskCompleted && (
+            <IconButton onClick={() => setIsSubtaskPanelOpen(true)} title="Add">
+              <Plus size={20} />
+            </IconButton>
+          )}
         </Stack>
+
         <AddSubtaskPanel
           isOpen={isSubtaskPanelOpen}
           onDismiss={() => {
@@ -162,7 +224,7 @@ const TaskSteps = () => {
         />
 
         <Dropdown
-          disabled={selectedKeys.size === 0}
+          disabled={selectedKeys.size === 0 || isTaskCompleted}
           placeholder="Bulk Change Status"
           options={statusOptions}
           onChange={(_, option) => handleStatusChange(option!.key)}
@@ -173,9 +235,9 @@ const TaskSteps = () => {
         <DetailsList
           items={subTask}
           columns={columns}
-          selectionMode={SelectionMode.multiple}
+          selectionMode={isTaskCompleted ? SelectionMode.none : SelectionMode.multiple}
           selection={selection!}
-          checkboxVisibility={CheckboxVisibility.always}
+          checkboxVisibility={isTaskCompleted ? CheckboxVisibility.hidden : CheckboxVisibility.always}
           layoutMode={DetailsListLayoutMode.justified}
           styles={{ root: { borderRadius: 6 } }}
         />
@@ -191,6 +253,45 @@ const TaskSteps = () => {
           ⚠️ No subtasks found for this task.
         </Text>
       )}
+
+      {/* Modal: Completing Last Subtask */}
+      <Dialog
+        hidden={!showConfirmDialog}
+        onDismiss={() => {
+          setShowConfirmDialog(false);
+          setPendingStatusChange(null);
+        }}
+        dialogContentProps={{
+          title: 'Complete Task?',
+          subText: 'Since this is your last subtask, completing it will mark the entire task as completed. You won’t be able to add or edit any further steps.',
+        }}
+      >
+        <DialogFooter>
+          <PrimaryButton onClick={confirmCompleteTask} text="Confirm" />
+          <DefaultButton
+            onClick={() => {
+              setShowConfirmDialog(false);
+              setPendingStatusChange(null);
+            }}
+            text="Cancel"
+          />
+        </DialogFooter>
+      </Dialog>
+
+      {/* Modal: Post-Deletion Check */}
+      <Dialog
+        hidden={!showPostDeleteDialog}
+        onDismiss={() => setShowPostDeleteDialog(false)}
+        dialogContentProps={{
+          title: 'Complete Task?',
+          subText: 'After deletion, your remaining all subtasks are completed. Do you want to mark the task as completed?',
+        }}
+      >
+        <DialogFooter>
+          <PrimaryButton onClick={confirmPostDeleteCompleteTask} text="Yes, Complete Task" />
+          <DefaultButton onClick={() => setShowPostDeleteDialog(false)} text="No" />
+        </DialogFooter>
+      </Dialog>
     </Stack>
   );
 };

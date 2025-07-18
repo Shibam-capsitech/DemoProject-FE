@@ -23,13 +23,17 @@ const AddSubtaskPanel = ({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: ()
     const [task, setTask] = useState<any>(null);
     const [subTasks, setSubTasks] = useState([{ title: '', status: 'Waiting' }]);
     const [alreadyExistedSubTasks, setAlreadyExistedSubTasks] = useState([]);
-    const {toggleRefresh} = useRefresh()
+    const { toggleRefresh } = useRefresh()
 
     const fetchTask = async () => {
         try {
             const res = await apiService.get(`/Task/get-task-by-id/${taskId}`);
             setTask(res.task);
-            setAlreadyExistedSubTasks(res.task.subtask || []);
+            const activeSubtasks = (res.task.subtask || []).filter(
+                (sub) => sub.isActive === true
+            );
+
+            setAlreadyExistedSubTasks(activeSubtasks);
         } catch (error) {
             console.error('Error fetching task details:', error);
         }
@@ -72,7 +76,7 @@ const AddSubtaskPanel = ({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: ()
         </div>
     );
 
-    const handleSubTaskDelete = async (id : string) => {
+    const handleSubTaskDelete = async (id: string) => {
         try {
             await apiService.post(`/Task/delete-subtask/${id}?taskId=${taskId}`, {});
             toast.success("Subtask deleted successfully");
@@ -125,7 +129,7 @@ const AddSubtaskPanel = ({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: ()
                                         disabled
                                         styles={{ root: { width: '50%' } }}
                                     />
-                                    <IconButton iconProps={{ iconName: 'Delete' }} onClick={()=>handleSubTaskDelete(subtask.id) } />
+                                    <IconButton iconProps={{ iconName: 'Delete' }} onClick={() => handleSubTaskDelete(subtask.id)} />
                                 </Stack>
                             ))}
                         </Stack>
