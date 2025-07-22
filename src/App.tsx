@@ -8,8 +8,10 @@ import Dashboard from "./pages/Dashboard";
 import TaskDetailsPage from "./pages/TaskDetailsPage";
 import ProtectedRoute from "./components/ProtectRoute";
 import ClientDetailsPage from "./pages/ClientDetailsPage";
+import { useUser } from "./context/UserContext";
 
 function App() {
+  const {role} = useUser()
   return (
     <Router>
       <Routes>
@@ -17,16 +19,17 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignupPage />} />
 
+        {role==="Admin" &&
         <Route
-          path="/admin"
+          path="/dashboard"
           element={
             <ProtectedRoute>
               <Dashboard />
             </ProtectedRoute>
           }
-        />
+        />}
         <Route
-          path="/admin/clients"
+          path="/clients"
           element={
             <ProtectedRoute>
               <ClientPage />
@@ -34,7 +37,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/clients/:businessId"
+          path="/clients/:businessId"
           element={
             <ProtectedRoute>
               <ClientDetailsPage />
@@ -42,7 +45,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/tasks"
+          path="/tasks"
           element={
             <ProtectedRoute>
               <TaskListPage />
@@ -50,7 +53,7 @@ function App() {
           }
         />
         <Route
-          path="/admin/tasks/:taskId"
+          path="/tasks/:taskId"
           element={
             <ProtectedRoute>
               <TaskDetailsPage />

@@ -3,10 +3,11 @@ import React from 'react';
 import { Stack, Text, DefaultButton } from '@fluentui/react';
 import { useNavigate } from 'react-router-dom';
 import { AlertCircle } from 'lucide-react';
+import { useUser } from '../context/UserContext';
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
-
+  const { role } = useUser()
   return (
     <Stack
       verticalAlign="center"
@@ -28,7 +29,12 @@ const NotFoundPage: React.FC = () => {
       <Text variant="large" styles={{ root: { maxWidth: 400, color: '#666' } }}>
         The page you are looking for might have been removed or doesn't exist.
       </Text>
-      <DefaultButton text="Go to Dashboard" onClick={() => navigate('/admin')} />
+      {
+        role === "Admin" ?
+          <DefaultButton text="Go to Dashboard" onClick={() => navigate('/dashboard')} />
+          :
+          <DefaultButton text="Go to Clients" onClick={() => navigate('/clients')} />
+      }
     </Stack>
   );
 };

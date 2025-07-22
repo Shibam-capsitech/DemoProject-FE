@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import CustomTable from '../components/DataTable';
 import Layout from '../components/Layout/Layout';
 import { DefaultButton, type IDropdownOption } from '@fluentui/react';
-import { Trash2, RefreshCcw, Edit } from 'lucide-react';
+import { Trash2, RefreshCcw, Edit, Download, DownloadCloud } from 'lucide-react';
 import AddBusinessPanel from '../components/AddBusinessPanel';
 import apiService from '../api/apiService';
 import { toast } from 'react-toastify';
@@ -28,6 +28,46 @@ const ClientPage: React.FC = () => {
     setSelectedBusiness(item);
     setIsEditPanelOpen(true);
   };
+  const convertToCSV = (data: any[]) => {
+    if (!data || data.length === 0) return '';
+
+    const headers = Object.keys(data[0]);
+    const csvRows = [
+      headers.join(','), // Header row
+      ...data.map(row =>
+        headers.map(field => {
+          const cell = row[field];
+          return `"${(typeof cell === 'object' && cell !== null) ? JSON.stringify(cell) : cell ?? ''}"`;
+        }).join(',')
+      ),
+    ];
+    return csvRows.join('\n');
+  };
+
+  const downloadCSV = async () => {
+    try {
+      const res = await apiService.get("Business/download-business-list");
+      const data = res.businesses;
+
+      const csvData = convertToCSV(data);
+      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'client_data.csv');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      toast.success("CSV downloaded successfully");
+    } catch (error) {
+      toast.error("Something went wrong!");
+      console.error("CSV download error:", error);
+    }
+  };
+  ;
+
   const columns = [
     {
       key: 'bid',
@@ -62,7 +102,7 @@ const ClientPage: React.FC = () => {
       fieldName: 'name',
       minWidth: 150,
       onRender: (item: any) => (
-        <span style={{ color: '#0078d4', cursor: "pointer" }} onClick={() => navigate(`/admin/clients/${item.id}`)}>
+        <span style={{ color: '#0078d4', cursor: "pointer" }} onClick={() => navigate(`/clients/${item.id}`)}>
           {item.name}
         </span>
       ),
@@ -144,7 +184,7 @@ const ClientPage: React.FC = () => {
 
   const criteria: IDropdownOption[] = [
     { key: 'Type', text: 'Business Type' },
-    // { key: 'state', text: 'State' },
+    { key: 'IsActive', text: 'State' },
   ];
 
   const valueMap: Record<string, IDropdownOption[]> = {
@@ -153,12 +193,13 @@ const ClientPage: React.FC = () => {
       { key: 'Partnership', text: 'Partnership' },
       { key: 'Limited Partnership', text: 'Limited Partnership' },
     ],
-    // state: [
-    //   { key: 'active', text: 'Active' },
-    //   { key: 'In Active', text: 'In Active' },
-    // ],
+    IsActive: [
+      { key: 'true', text: 'Active' },
+      { key: 'false', text: 'In Active' },
+    ],
   };
 
+  const [currPage, setCurrPage] = useState(0)
   const fetchClientData = async () => {
     try {
       const response = await apiService.get('/Business/get-all-businesses');
@@ -181,6 +222,7 @@ const ClientPage: React.FC = () => {
       }));
 
       setClientData(formatted);
+      setCurrPage(response.pagination.currentPage)
       console.log('Formatted Client Data:', formatted);
 
     } catch (error) {
@@ -194,10 +236,8 @@ const ClientPage: React.FC = () => {
   };
 
   const confirmDelete = () => {
-    // Perform deletion logic here
     console.log('Deleting:', selectedToDelete);
     setIsDeleteDialogOpen(false);
-    // Optionally reset
     setSelectedToDelete(null);
   };
 
@@ -241,7 +281,13 @@ const ClientPage: React.FC = () => {
               text="Refresh"
               styles={{ root: { border: 'none' } }}
               onClick={fetchClientData}
-              onRenderIcon={() => <RefreshCcw size={20} />}
+              onRenderIcon={() => <RefreshCcw size={17} />}
+            />
+            <DefaultButton
+              onRenderIcon={() => <DownloadCloud size={17} />}
+              text="Download CSV"
+              styles={{ root: { border: 'none' } }}
+              onClick={downloadCSV}
             />
           </div>
         }

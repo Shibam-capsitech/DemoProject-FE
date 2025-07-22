@@ -67,7 +67,7 @@ function AddTaskPanel({ businessName }: AddTaskPanelProps) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const businessRes = await apiService.get('/Business/get-all-businesses');
+        const businessRes = await apiService.get('/Business/get-all-businesses-name');
         const businessOpts = businessRes.businesses.map((b: any) => ({
           key: b.id,
           text: b.name,
@@ -351,7 +351,7 @@ function AddTaskPanel({ businessName }: AddTaskPanelProps) {
               required
             />
             {formik.touched.file && formik.errors.file && (
-              <div style={{ color: 'red', fontSize: '12px', marginTop: 4 }}>
+              <div style={{ color: '#8d0000ff', fontSize: '12px', marginTop: 4 }}>
                 {formik.errors.file}
               </div>
             )}

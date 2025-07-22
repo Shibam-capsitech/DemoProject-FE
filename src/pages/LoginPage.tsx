@@ -56,7 +56,7 @@ const LoginPage: React.FC = () => {
         });
 
         toast.success("Login successful!");
-        navigate("/admin/clients");
+        navigate("/clients");
       } catch (error: any) {
         toast.error(error?.response?.data || "Login error");
       }

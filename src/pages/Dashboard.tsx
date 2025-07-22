@@ -22,7 +22,8 @@ import {
 } from 'recharts';
 import apiService from '../api/apiService';
 import { format, eachDayOfInterval, startOfMonth, endOfMonth } from 'date-fns';
-import { Group, Hourglass, SquareCheckBig, TrendingDown, TrendingUp, Users } from 'lucide-react';
+import { TrendingUp } from "lucide-react";
+import { BarChart3 } from "lucide-react";
 
 const Dashboard: React.FC = () => {
   const [selectedMonth, setSelectedMonth] = useState<'thisMonth' | 'lastMonth'>('thisMonth');
@@ -128,8 +129,7 @@ const Dashboard: React.FC = () => {
 
   const isUp = percentChange !== 'N/A' && parseFloat(percentChange) >= 0;
   const trendIcon = (
-    <FontIcon
-      iconName={isUp ? 'CaretUpSolid8' : 'CaretDownSolid8'}
+    <TrendingUp
       style={{ color: isUp ? 'green' : 'red', fontSize: 16 }}
     />
   );
@@ -143,12 +143,12 @@ const Dashboard: React.FC = () => {
     {
       title: 'Total Pending Tasks',
       value: totalIncomplete,
-      icon: <FontIcon iconName="HourGlass" style={{ fontSize: 25, color: '#cf9800ff' }} />,
+      icon: <FontIcon iconName="HourGlass" style={{ fontSize: 25, color: '#0078d4' }} />,
     },
     {
       title: 'Total Businesses',
       value: totalBusinesses,
-      icon: <FontIcon iconName="BusinessCenterLogo" style={{ fontSize: 25, color: '#0099bc' }} />,
+      icon: <FontIcon iconName="BusinessCenterLogo" style={{ fontSize: 25, color: '#0078d4' }} />,
     },
   ];
 
@@ -185,7 +185,7 @@ const Dashboard: React.FC = () => {
               }}
             >
               <Stack horizontal tokens={{ childrenGap: 10 }} verticalAlign="center">
-                <FontIcon iconName="CompletedSolid" style={{ fontSize: 25, color: '#0078d4' }} />
+                < BarChart3 style={{ fontSize: 25, color: '#0078d4' }} />
                 <Text variant="xLarge" styles={{ root: { fontWeight: 600 } }}>
                   {currentMonthCompleted} / {previousMonthCompleted}
                 </Text>
@@ -267,25 +267,26 @@ const Dashboard: React.FC = () => {
         >
           <ResponsiveContainer width="100%" height={300}>
             <BarChart
+            style={{hover:"none"}}
               data={taskPerUser}
               margin={{ top: 10, right: 30, left: 20, bottom: 5 }}
             >
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis allowDecimals={false} />
-              <Tooltip />
+             <Tooltip cursor={{fill: 'transparent'}}/>
               <Legend />
               <Bar
                 dataKey="creation_count"
-                fill="#1a6ff7c5" 
+                fill="#1a6ff79d" 
                 name="Created"
-                activeBar={<Rectangle fill="#1a6df7" stroke="#1253c0" />} 
+                activeBar={<Rectangle fill="#1a6ff7c7" stroke="#1253c0"  />} 
               />
               <Bar
                 dataKey="completion_count"
-                fill="#00b96cbb" // Fluent success green
+                fill="#00b96c94" // Fluent success green
                 name="Completed"
-                activeBar={<Rectangle fill="#00b96b" stroke="#008a55" />} 
+                activeBar={<Rectangle fill="#00b96ccb" stroke="#008a55c4" />} 
               />
 
             </BarChart>

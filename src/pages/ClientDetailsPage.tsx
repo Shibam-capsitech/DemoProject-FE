@@ -43,8 +43,21 @@ const ClientDetailsPage: React.FC = () => {
     // );
 
     const taskColumns: IColumn[] = [
-        { key: 'title', name: 'Task', fieldName: 'title', minWidth: 180, },
-        { key: 'dueDate', name: 'Due Date', fieldName: 'dueDate', minWidth: 100, onRender: (item) => item?.dueDate ? new Date(item.dueDate).toLocaleDateString() : 'N/A' },
+        {
+            key: 'title',
+            name: 'Task',
+            fieldName: 'title',
+            minWidth: 180,
+            onRender: (item: any) => (
+                <span
+                    style={{ color: '', cursor: 'pointer', textDecoration: 'none' }}
+                    onClick={() => navigate(`/tasks/${item.id}`)}
+                >
+                    {item.title}
+                </span>
+            ),
+        },
+        { key: 'duedate', name: 'Due Date', fieldName: 'duedate', minWidth: 100, onRender: (item) => item?.duedate ? new Date(item.duedate).toLocaleDateString() : 'N/A' },
         {
             key: 'status',
             name: 'Status',
@@ -101,7 +114,7 @@ const ClientDetailsPage: React.FC = () => {
     const confirmDelete = async () => {
         try {
             await apiService.post(`/Business/delete-business-by-id/${businessId}`, {})
-            navigate("/admin/clients")
+            navigate("/clients")
         } catch (error) {
             toast.error("Something went wrong !")
         }
@@ -186,30 +199,30 @@ const ClientDetailsPage: React.FC = () => {
                                 <EditBusinessPanel businessId={businessId ?? ''} isOpen={isEditOpen} onDismiss={dismissEditPanel} />
 
                                 <Stack horizontal horizontalAlign='space-between' wrap tokens={{ childrenGap: 16 }}>
-                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4}}>
+                                    <Stack styles={{ root: { width: '20%' } }} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Type</Text>
                                         <Text>{businessData?.type}</Text>
                                     </Stack>
-                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{ root: { width: '20%' } }} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Building</Text>
                                         <Text>{businessData?.address.building}</Text>
                                     </Stack>
-                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{ root: { width: '20%' } }} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">City</Text>
                                         <Text>{businessData?.address.city}</Text>
                                     </Stack>
                                 </Stack>
 
                                 <Stack horizontal horizontalAlign='space-between' wrap tokens={{ childrenGap: 16 }}>
-                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{ root: { width: '20%' } }} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">State</Text>
                                         <Text>{businessData?.address.state}</Text>
                                     </Stack>
-                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{ root: { width: '20%' } }} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Country</Text>
                                         <Text>{businessData?.address.country}</Text>
                                     </Stack>
-                                    <Stack styles={{root :{width : '20%'}}} grow tokens={{ childrenGap: 4 }}>
+                                    <Stack styles={{ root: { width: '20%' } }} grow tokens={{ childrenGap: 4 }}>
                                         <Text variant="mediumPlus">Postcode</Text>
                                         <Text>{businessData?.address.postcode}</Text>
                                     </Stack>
@@ -288,7 +301,7 @@ const ClientDetailsPage: React.FC = () => {
                     </Pivot>
                 </Stack>
 
-                <Stack styles={{ root: { flex: 1, paddingTop:"10px" } }} tokens={{ childrenGap: 12 }}>
+                <Stack styles={{ root: { flex: 1, paddingTop: "10px" } }} tokens={{ childrenGap: 12 }}>
                     <Stack horizontal horizontalAlign="space-between" verticalAlign="center">
                         <Text variant="large">Tasks</Text>
                         <Stack horizontal tokens={{ childrenGap: 8 }} verticalAlign="center">
@@ -302,7 +315,7 @@ const ClientDetailsPage: React.FC = () => {
                                 styles={{ root: { width: 120 } }}
                             /> */}
                             <IconButton onClick={() => { }}><RefreshCw size={16} /></IconButton>
-                            <AddTaskPanel businessName={businessData?.name}/>
+                            <AddTaskPanel businessName={businessData?.name} />
                         </Stack>
                     </Stack>
                     <DetailsList

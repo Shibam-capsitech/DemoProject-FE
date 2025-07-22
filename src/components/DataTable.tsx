@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   DetailsList,
   DetailsListLayoutMode,
@@ -69,6 +69,29 @@ const CustomTable: React.FC<CustomTableProps> = ({
   const location = useLocation();
   const isClientActive = location.pathname.includes("client");
   const isTaskActive = location.pathname.includes("task");
+  
+  const slnoColumn: IColumn = {
+  key: 'slno',
+  name: 'SL/No',
+  fieldName: 'slno',
+  minWidth: 80,
+  maxWidth: 100,
+  onRender: (item: any, index?: number) => {
+    const serial = (currentPage - 1) * (pageSize || 10) + (index ?? 0) + 1;
+    return (
+      <span style={{
+        fontFamily: 'monospace',
+        padding: '2px 6px',
+        borderRadius: 4,
+        display: 'inline-block',
+      }}>
+        {serial}
+      </span>
+    );
+  },
+};
+
+const combinedColumns: IColumn[] = [slnoColumn, ...columns];
 
   const dropdownStyles: Partial<IDropdownStyles> = {
     dropdown: { width: "100%" },
@@ -94,10 +117,12 @@ const CustomTable: React.FC<CustomTableProps> = ({
     onRowClick?.(item);
   };
 
-  const handleSearch = async (_: any, newValue?: string) => {
-    const keyword = newValue || "";
+  const [totalCount, setTotalCount] = useState(0);
+
+  const handleSearch = async (_?: any, newValue?: string, page = 1) => {
+    const keyword = newValue !== undefined ? newValue : filterText;
     setFilterText(keyword);
-    setCurrentPage(1);
+    setCurrentPage(page);
 
     try {
       const queryParams = new URLSearchParams();
@@ -111,33 +136,47 @@ const CustomTable: React.FC<CustomTableProps> = ({
         queryParams.append("search", keyword);
       }
 
+      queryParams.append("page", page.toString());
+      queryParams.append("pageSize", pageSize?.toString() || "10");
+
       const endpoint = isClientActive
         ? `/Business/get-all-businesses?${queryParams.toString()}`
         : `/Task/get-all-task?${queryParams.toString()}`;
 
       const res = await apiService.get(endpoint);
-      setFilteredTableData(res.filteredData || res.businesses || res.tasks || []);
+
+      setFilteredTableData(res.tasks || res.businesses || []);
+      setTotalCount(res.pagination?.totalCount || 0);
     } catch (error) {
       console.error("Search failed:", error);
     }
   };
 
+  const handleCancelFilter = async()=>{
+    try {
+      const endpoint = isClientActive
+        ? `/Business/get-all-businesses`
+        : `/Task/get-all-task`;
+
+      const res = await apiService.get(endpoint);
+
+      setFilteredTableData(res.tasks || res.businesses || []);
+      setTotalCount(res.pagination?.totalCount || 0);
+    } catch (error) {
+      
+    }
+  }
+  useEffect(() => {
+    handleSearch(undefined, "", 1); 
+  }, []);
   const handleApplyFilter = () => {
     handleSearch(null, filterText);
     setIsFilterApplied(true)
     toggleIsCalloutVisible();
   };
 
-  const visibleItems = useMemo(() => {
-    const baseItems = filteredTableData ?? items;
-    if (!pageSize) return baseItems;
-    const start = (currentPage - 1) * pageSize;
-    return baseItems.slice(start, start + pageSize);
-  }, [filteredTableData, items, currentPage, pageSize]);
-
-  const totalPages = pageSize
-    ? Math.ceil((filteredTableData ?? items).length / pageSize)
-    : 1;
+  const visibleItems = filteredTableData ?? items;
+  const totalPages = pageSize ? Math.ceil(totalCount / pageSize) : 1;
 
   return (
     <Stack styles={{ root: { width: "100%" } }}>
@@ -194,6 +233,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                     setSelectedValue(undefined);
                     setIsFilterApplied(false)
                     setFilteredTableData(null);
+                    handleCancelFilter()
                   }}
                 >
                   &times;
@@ -255,7 +295,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                     Apply
                   </PrimaryButton>
                   <DefaultButton onClick={toggleIsCalloutVisible}>Cancel</DefaultButton>
-                  <DefaultButton
+                  {/* <DefaultButton
                     onClick={() => {
                       setFilteredTableData(null);
                       setSelectedCriteria(undefined);
@@ -265,7 +305,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
                     styles={{ root: { whiteSpace: "noWrap" } }}
                   >
                     Clear Filter
-                  </DefaultButton>
+                  </DefaultButton> */}
                 </Stack>
               </FocusZone>
             </FocusTrapCallout>
@@ -277,7 +317,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
         <>
           <DetailsList
             items={visibleItems}
-            columns={columns as IColumn[]}
+            columns={combinedColumns as IColumn[]}
             setKey="set"
             layoutMode={DetailsListLayoutMode.justified}
             selectionMode={selectionMode}
@@ -319,17 +359,28 @@ const CustomTable: React.FC<CustomTableProps> = ({
                   cursor: currentPage <= 1 ? "not-allowed" : "pointer",
                   opacity: currentPage <= 1 ? 0.3 : 1,
                 }}
-                onClick={() => currentPage > 1 && setCurrentPage((p) => p - 1)}
+                onClick={() => {
+                  if (currentPage > 1) {
+                    handleSearch(undefined, filterText, currentPage - 1);
+                  }
+                }}
               />
+
               <Text>Page {currentPage} of {totalPages}</Text>
+
               <ChevronRight
                 size={20}
                 style={{
                   cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
                   opacity: currentPage >= totalPages ? 0.3 : 1,
                 }}
-                onClick={() => currentPage < totalPages && setCurrentPage((p) => p + 1)}
+                onClick={() => {
+                  if (currentPage < totalPages) {
+                    handleSearch(undefined, filterText, currentPage + 1);
+                  }
+                }}
               />
+
             </Stack>
           )}
         </>

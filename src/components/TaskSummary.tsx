@@ -97,7 +97,7 @@ const TaskSummary: React.FC = () => {
   const confirmDelete = async () => {
     try {
       await apiService.post(`/Task/delete-task/${taskId}`, {})
-      navigate("/admin/tasks")
+      navigate("/tasks")
     } catch (error) {
       toast.error("Something went wrong !")
     }
@@ -175,7 +175,7 @@ const TaskSummary: React.FC = () => {
           <Stack>
             <Text styles={{ root: labelStyle }}>Business name</Text>
             <Link
-              href={`/admin/clients/${task.businessDetails?.id}`}
+              href={`/clients/${task.businessDetails?.id}`}
               styles={{
                 root: {
                   ...valueStyle,

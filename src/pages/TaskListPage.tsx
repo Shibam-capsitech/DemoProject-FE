@@ -117,7 +117,7 @@ const ClientPage: React.FC = () => {
             cursor: 'pointer',
             
           }}
-          onClick={() => navigate(`/admin/tasks/${item.id}`)}
+          onClick={() => navigate(`/tasks/${item.id}`)}
         >
           {item.title}
         </span>
@@ -142,21 +142,21 @@ const ClientPage: React.FC = () => {
     {
       key: 'startDate',
       name: 'Start Date',
-      fieldName: 'startDate',
+      fieldName: 'startdate',
       minWidth: 120,
       maxWidth: 100,
       onRender: (item: any) => (
-        <span style={cellStyle}>{new Date(item.startDate).toLocaleDateString('en-GB')}</span>
+        <span style={cellStyle}>{new Date(item.startdate).toLocaleDateString('en-GB')}</span>
       ),
     },
     {
-      key: 'dueDate',
+      key: 'duedate',
       name: 'Due Date',
-      fieldName: 'dueDate',
+      fieldName: 'duedate',
       minWidth: 120,
       maxWidth: 100,
       onRender: (item: any) => (
-        <span style={cellStyle}>{new Date(item.dueDate).toLocaleDateString('en-GB')}</span>
+        <span style={cellStyle}>{new Date(item.duedate).toLocaleDateString('en-GB')}</span>
       ),
     },
     {
@@ -208,16 +208,16 @@ const ClientPage: React.FC = () => {
       },
     },
     {
-      key: 'file',
+      key: 'attachment',
       name: 'Attachment',
-      fieldName: 'file',
+      fieldName: 'attachment',
       minWidth: 80,
       onRender: (item: any) => (
         <a
-          href={item.file}
+          href={item.attachment}
           target="_blank"
           rel="noopener noreferrer"
-          style={{ ...cellStyle, color: '#0078d4', textDecoration: 'underline' }}
+          style={{ ...cellStyle, color: '#0078d4', textDecoration: 'underline', cursor:"pointer" }}
         >
           View
         </a>

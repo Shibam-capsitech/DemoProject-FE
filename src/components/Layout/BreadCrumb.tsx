@@ -6,7 +6,7 @@ import apiService from "../../api/apiService";
 
 
 const routeNameMap: { [key: string]: string } = {
-  admin: "Home",
+  admin: "dashboard",
   clients: "Clients",
   tasks: "Tasks",
   login: "Login",

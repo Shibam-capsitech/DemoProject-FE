@@ -52,12 +52,12 @@ function AddBusinessPanel({ onSuccess }: { onSuccess?: () => void }) {
         validate: values => {
             const errors: any = {};
             if (!values.type) errors.type = 'Type is required';
-            if (!values.name) errors.title = 'Name is required';
-            if (!values.city) errors.priority = 'City is required';
-            if (!values.country) errors.startDate = 'Country is required';
-            if (!values.postcode) errors.assignee = 'Postcode is required';
-            if (!values.state) errors.description = 'State is required';
-            if (!values.building) errors.file = 'Building is required';
+            if (!values.name) errors.name = 'Name is required';
+            if (!values.city) errors.city = 'City is required';
+            if (!values.country) errors.country = 'Country is required';
+            if (!values.postcode) errors.postcode = 'Postcode is required';
+            if (!values.state) errors.state = 'State is required';
+            if (!values.building) errors.building = 'Building is required';
             return errors;
         },
         onSubmit: async (values, { resetForm }) => {

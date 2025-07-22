@@ -8,6 +8,7 @@ import {
   LogOut,
   Users,
 } from 'lucide-react';
+import { useUser } from '../../context/UserContext';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -22,7 +23,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapse }) => {
     key: 'dashboard',
     name: 'Dashboard',
     icon: <LayoutDashboard size={18} />,
-    route: '/admin',
+    route: '/dashboard',
   };
 
     const logoutPath = {
@@ -33,16 +34,16 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapse }) => {
   };
 
   const operationLinks = [
-    { key: 'clients', name: 'Client', icon: <Users size={18} />, route: '/admin/clients' },
-    { key: 'tasks', name: 'Tasks', icon: <ClipboardList size={18} />, route: '/admin/tasks' },
+    { key: 'clients', name: 'Client', icon: <Users size={18} />, route: '/clients' },
+    { key: 'tasks', name: 'Tasks', icon: <ClipboardList size={18} />, route: '/tasks' },
   ];
 
   const isActive = (path: string) => {
-    if (path === '/admin') return location.pathname === '/admin';
+    if (path === '/dashboard') return location.pathname === '/dashboard';
     return location.pathname.startsWith(path);
   };
   const dashboardActive = isActive(dashboardLink.route);
-
+ const {role} = useUser()
   return (
     <Stack
       verticalAlign="start"
@@ -79,6 +80,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapse }) => {
         </IconButton>
       </Stack>
 
+      {role=== "Admin" &&
       <Stack
         horizontal
         verticalAlign="center"
@@ -106,7 +108,7 @@ const Sidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapse }) => {
             {dashboardLink.name}
           </Text>
         )}
-      </Stack>
+      </Stack>}
 
       {!collapsed && (
         <Text

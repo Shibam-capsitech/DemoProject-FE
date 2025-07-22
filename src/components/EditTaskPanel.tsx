@@ -107,7 +107,7 @@ const EditTaskPanel: React.FC<EditTaskPanelProps> = ({
 
         const fetchBusinesses = async () => {
             try {
-                const businessRes = await apiService.get('/Business/get-all-businesses');
+                const businessRes = await apiService.get('/Business/get-all-businesses-name');
                 setBusinessOptions(
                     businessRes.businesses.map((b: any) => ({
                         key: b.id,
