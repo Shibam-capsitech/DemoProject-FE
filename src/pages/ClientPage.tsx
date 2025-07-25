@@ -28,45 +28,34 @@ const ClientPage: React.FC = () => {
     setSelectedBusiness(item);
     setIsEditPanelOpen(true);
   };
-  const convertToCSV = (data: any[]) => {
-    if (!data || data.length === 0) return '';
 
-    const headers = Object.keys(data[0]);
-    const csvRows = [
-      headers.join(','), // Header row
-      ...data.map(row =>
-        headers.map(field => {
-          const cell = row[field];
-          return `"${(typeof cell === 'object' && cell !== null) ? JSON.stringify(cell) : cell ?? ''}"`;
-        }).join(',')
-      ),
-    ];
-    return csvRows.join('\n');
-  };
+const downloadCSV = async () => {
+  try {
+    const res = await apiService.get("Business/download-business-list", {
+      responseType: "blob", 
+    });
 
-  const downloadCSV = async () => {
-    try {
-      const res = await apiService.get("Business/download-business-list");
-      const data = res.businesses;
+    const blob = new Blob([res.data], { type: "text/csv" });
 
-      const csvData = convertToCSV(data);
-      const blob = new Blob([csvData], { type: 'text/csv;charset=utf-8;' });
-      const url = URL.createObjectURL(blob);
+    const fileName = "businesses.csv";
 
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', 'client_data.csv');
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    window.URL.revokeObjectURL(url);
 
-      toast.success("CSV downloaded successfully");
-    } catch (error) {
-      toast.error("Something went wrong!");
-      console.error("CSV download error:", error);
-    }
-  };
-  ;
+    toast.success("CSV download started");
+  } catch (error) {
+    toast.error("Something went wrong!");
+    console.error("CSV download error:", error);
+  }
+};
+
+
 
   const columns = [
     {
@@ -142,13 +131,13 @@ const ClientPage: React.FC = () => {
       minWidth: 100,
       onRender: (item: any) => <span style={{ fontVariantNumeric: 'tabular-nums' }}>{item.address.postcode}</span>,
     },
-    {
-      key: 'username',
-      name: 'Username',
-      fieldName: 'username',
-      minWidth: 150,
-      onRender: (item: any) => <span style={{ fontWeight: 500 }}>{item.createdBy?.name}</span>,
-    },
+    // {
+    //   key: 'username',
+    //   name: 'Username',
+    //   fieldName: 'username',
+    //   minWidth: 150,
+    //   onRender: (item: any) => <span style={{ fontWeight: 500 }}>{item.createdBy?.name}</span>,
+    // },
     {
       key: 'email',
       name: 'Email',
