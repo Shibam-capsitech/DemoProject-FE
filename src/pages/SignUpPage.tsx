@@ -63,7 +63,7 @@ const SignupPage: React.FC = () => {
         },
       };
 
-      const res = await apiService.post("/User/signup", payload);
+      await apiService.post("/User/signup", payload);
       toast.success("Signup successful! Redirecting to login...");
       navigate("/login");
     } catch (error) {

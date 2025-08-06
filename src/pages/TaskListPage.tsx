@@ -8,12 +8,12 @@ import {
   DialogFooter,
   type IDropdownOption,
 } from '@fluentui/react';
-import { Trash2, Edit2, Eye, RefreshCcw, Edit } from 'lucide-react';
+import {  RefreshCcw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import AddTaskPanel from '../components/AddTaskPanel';
 import apiService from '../api/apiService';
 import { useRefresh } from '../context/RefreshContext';
-import { max } from 'date-fns';
+// import { max } from 'date-fns';
 import EditTaskPanel from '../components/EditTaskPanel';
 import { toast } from 'react-toastify';
 
@@ -27,18 +27,18 @@ const ClientPage: React.FC = () => {
   const navigate = useNavigate();
   const { refresh } = useRefresh()
   const [editPanelOpen, setEditPanelOpen] = useState(false);
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [selectedTaskId, ] = useState<string | null>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [selectedToDelete, setSelectedToDelete] = useState<any>(null);
   const {toggleRefresh} = useRefresh()
-  const handleEdit = (task: any) => {
-    setSelectedTaskId(task.id);  
-    setEditPanelOpen(true);
-  };
-  const handleDelete = (item: any) => {
-    setSelectedToDelete(item);
-    setIsDeleteDialogOpen(true);
-  };
+  // const handleEdit = (task: any) => {
+  //   setSelectedTaskId(task.id);  
+  //   setEditPanelOpen(true);
+  // };
+  // const handleDelete = (item: any) => {
+  //   setSelectedToDelete(item);
+  //   setIsDeleteDialogOpen(true);
+  // };
 
   const confirmDelete = async() => {
     try {

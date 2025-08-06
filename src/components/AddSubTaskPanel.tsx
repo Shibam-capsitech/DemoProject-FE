@@ -151,7 +151,7 @@ const AddSubtaskPanel = ({ isOpen, onDismiss }: { isOpen: boolean; onDismiss: ()
                             <TextField
                                 placeholder="Step title"
                                 value={subtask.title}
-                                onChange={(e, v) => handleSubtaskChange(index, 'title', v || '')}
+                                onChange={(_, v) => handleSubtaskChange(index, 'title', v || '')}
                                 styles={{ root: { width: '50%' } }}
                             />
                             <IconButton iconProps={{ iconName: 'Delete' }} onClick={() => handleRemoveSubtask(index)} />

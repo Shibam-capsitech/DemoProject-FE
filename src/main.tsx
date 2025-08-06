@@ -1,9 +1,9 @@
-import { StrictMode } from 'react'
+
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import './App.css'
 import App from './App.tsx'
-import { ToastContainer, toast } from 'react-toastify'
+import { ToastContainer,  } from 'react-toastify'
 import { UserProvider } from './context/UserContext.tsx'
 import { RefreshProvider } from './context/RefreshContext.tsx'
 

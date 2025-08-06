@@ -7,7 +7,6 @@ import {
     Dropdown,
     DatePicker,
     type IDropdownOption,
-    Stack,
 } from '@fluentui/react';
 import { useFormik } from 'formik';
 import apiService from '../api/apiService';
@@ -51,7 +50,7 @@ const EditTaskPanel: React.FC<EditTaskPanelProps> = ({
     onSuccess,
 }) => {
     const [task, setTask] = useState<any>(null);
-    const [businessOptions, setBusinessOptions] = useState<IDropdownOption[]>([]);
+    const [, setBusinessOptions] = useState<IDropdownOption[]>([]);
     const [userOptions, setUserOptions] = useState<IDropdownOption[]>([]);
     const fetchTask = async () => {
         try {

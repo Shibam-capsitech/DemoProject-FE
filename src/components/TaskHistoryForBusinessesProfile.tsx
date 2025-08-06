@@ -34,7 +34,7 @@ interface HistoryEntry {
 
 const TaskHistory: React.FC = () => {
   const { businessId } = useParams<{ businessId: string }>();
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [, setHistory] = useState<HistoryEntry[]>([]);
   const [groupedHistory, setGroupedHistory] = useState<HistoryEntry[][]>([]);
   const { refresh } = useRefresh();
   const [currentIndex, setCurrentIndex] = useState(0);

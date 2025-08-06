@@ -1,9 +1,8 @@
-import React from 'react';
+
 import {
   Stack,
   Text,
   IconButton,
-  type IIconProps,
 } from '@fluentui/react';
 import { Search, Bell, Settings, HelpCircle } from 'lucide-react';
 

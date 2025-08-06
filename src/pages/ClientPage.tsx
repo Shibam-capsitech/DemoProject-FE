@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import CustomTable from '../components/DataTable';
 import Layout from '../components/Layout/Layout';
 import { DefaultButton, type IDropdownOption } from '@fluentui/react';
-import { Trash2, RefreshCcw, Edit, Download, DownloadCloud } from 'lucide-react';
+import {  RefreshCcw, DownloadCloud } from 'lucide-react';
 import AddBusinessPanel from '../components/AddBusinessPanel';
 import apiService from '../api/apiService';
 import { toast } from 'react-toastify';
@@ -24,10 +24,10 @@ const ClientPage: React.FC = () => {
   const [selectedToDelete, setSelectedToDelete] = useState<any>(null);
 
 
-  const handleEdit = (item: any) => {
-    setSelectedBusiness(item);
-    setIsEditPanelOpen(true);
-  };
+  // const handleEdit = (item: any) => {
+  //   setSelectedBusiness(item);
+  //   setIsEditPanelOpen(true);
+  // };
 
 const downloadCSV = async () => {
   try {
@@ -188,7 +188,7 @@ const downloadCSV = async () => {
     ],
   };
 
-  const [currPage, setCurrPage] = useState(0)
+  const [, setCurrPage] = useState(0)
   const fetchClientData = async () => {
     try {
       const response = await apiService.get('/Business/get-all-businesses');
@@ -219,10 +219,10 @@ const downloadCSV = async () => {
       console.error('Error fetching client data:', error);
     }
   };
-  const handleDelete = (item: any) => {
-    setSelectedToDelete(item);
-    setIsDeleteDialogOpen(true);
-  };
+  // const handleDelete = (item: any) => {
+  //   setSelectedToDelete(item);
+  //   setIsDeleteDialogOpen(true);
+  // };
 
   const confirmDelete = () => {
     console.log('Deleting:', selectedToDelete);

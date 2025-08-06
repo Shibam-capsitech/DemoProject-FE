@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Stack,
   Text,
@@ -46,7 +46,7 @@ const TaskSteps = () => {
   const fetchTask = async () => {
     try {
       const res = await apiService.get(`/Task/get-task-by-id/${taskId}`);
-      const activeSubtasks = (res.task.subtask || []).filter(st => st.isActive);
+      const activeSubtasks = (res.task.subtask || []).filter((st:any) => st.isActive);
       setSubTask(activeSubtasks);
       setIsTaskCompleted(res.task.isCompleted);
     } catch (error) {

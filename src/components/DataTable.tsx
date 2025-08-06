@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   DetailsList,
   DetailsListLayoutMode,
@@ -23,7 +23,6 @@ import { DefaultButton, PrimaryButton } from "@fluentui/react/lib/Button";
 import { useBoolean, useId } from "@fluentui/react-hooks";
 import apiService from "../api/apiService";
 import { useLocation } from "react-router-dom";
-import { boolean } from "yup";
 
 interface ColumnConfig {
   key: string;
@@ -68,7 +67,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   const [isFilterApplied, setIsFilterApplied] = useState(false)
   const location = useLocation();
   const isClientActive = location.pathname.includes("client");
-  const isTaskActive = location.pathname.includes("task");
+  //const isTaskActive = location.pathname.includes("task");
   
   const slnoColumn: IColumn = {
   key: 'slno',
@@ -76,7 +75,7 @@ const CustomTable: React.FC<CustomTableProps> = ({
   fieldName: 'slno',
   minWidth: 80,
   maxWidth: 100,
-  onRender: (item: any, index?: number) => {
+  onRender: (index?: number) => {
     const serial = (currentPage - 1) * (pageSize || 10) + (index ?? 0) + 1;
     return (
       <span style={{

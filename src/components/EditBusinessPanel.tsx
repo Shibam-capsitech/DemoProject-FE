@@ -30,7 +30,7 @@ function EditBusinessPanel({
     onDismiss: () => void;
 }) {
     const { toggleRefresh } = useRefresh();
-    const [loading, setLoading] = useState(false);
+    const [, setLoading] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
     const formik = useFormik({
@@ -52,7 +52,7 @@ function EditBusinessPanel({
                     formData.append(key, val);
                 });
 
-                const res = await apiService.post(`/Business/update-business-by-id/${businessId}`, formData);
+                 await apiService.post(`/Business/update-business-by-id/${businessId}`, formData);
                 toast.success('Business updated successfully!');
                 toggleRefresh();
                 onDismiss();

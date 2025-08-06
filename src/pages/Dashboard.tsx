@@ -87,15 +87,14 @@ const Dashboard: React.FC = () => {
   ];
 
 
-  const completedThisMonth = 24;
-  var completedLastMonth = 16;
+  
 
-  const isPositive = completedThisMonth >= completedLastMonth;
+  //const isPositive = completedThisMonth >= completedLastMonth;
 
-  const trendColor = isPositive ? '#28a745' : '#d32f2f';
+  //const trendColor = isPositive ? '#28a745' : '#d32f2f';
 
   const [stats, setStats] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {

@@ -1,11 +1,9 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
     Stack,
     Text,
     Pivot,
     PivotItem,
-    Dropdown,
-    DropdownMenuItemType,
     DetailsList,
     DetailsListLayoutMode,
     SelectionMode,
@@ -15,7 +13,7 @@ import {
     Dialog,
     DialogFooter,
 } from '@fluentui/react';
-import { Plus, Edit, Mail, RefreshCw, Edit2, Trash2, } from 'lucide-react';
+import {  Edit, RefreshCw, Trash2, } from 'lucide-react';
 import Layout from '../components/Layout/Layout';
 import TaskHistory from '../components/TaskHistoryForBusinessesProfile';
 import apiService from '../api/apiService';
@@ -29,7 +27,7 @@ import AddTaskPanel from '../components/AddTaskPanel';
 
 
 const ClientDetailsPage: React.FC = () => {
-    const [taskView, setTaskView] = useState<'upcoming' | 'completed'>('upcoming');
+    //const [taskView, setTaskView] = useState<'upcoming' | 'completed'>('upcoming');
     const [businessData, setBusinessData] = useState<any>(null);
     const { businessId } = useParams<{ businessId: string }>();
     const { refresh, toggleRefresh } = useRefresh()

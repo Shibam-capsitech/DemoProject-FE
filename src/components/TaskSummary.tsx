@@ -30,7 +30,7 @@ const TaskSummary: React.FC = () => {
   const { taskId } = useParams<{ taskId: string }>();
   const [task, setTask] = useState<any>(null);
   const [isPanelOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
-  const [businessOptions, setBusinessOptions] = useState<IDropdownOption[]>([]);
+  const [, setBusinessOptions] = useState<IDropdownOption[]>([]);
   const [hasAccessToDelete, setHasAccessToDelete] = useState(false)
   const [hasAccessToEdit, setHasAccessToEdit] = useState(false)
   const [userOptions, setUserOptions] = useState<IDropdownOption[]>([]);
